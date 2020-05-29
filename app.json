@@ -1,0 +1,27 @@
+{
+  "expo": {
+    "sdkVersion": "37.0.0",
+    "name": "Paper Game",
+    "slug": "PaperGame",
+    "platforms": ["ios", "android", "web"],
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": ["**/*"],
+    "android": {
+      "package": "com.vrudi.papergame",
+      "versionCode": 1
+    },
+    "ios": {
+      "supportsTablet": true
+    }
+  }
+}
