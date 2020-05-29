@@ -32,7 +32,7 @@ const init = {
   // roundWordsLeft: 3,
 }
 
-export function teams(state = init, action) {
+export function reducer(state = init, action) {
   switch (action.type) {
     case ACTION.SAVE_TEAMS:
       return { ...state, teams: action.payload }
@@ -41,16 +41,25 @@ export function teams(state = init, action) {
   }
 }
 
-export function players(state = init, action) {
-  switch (action.type) {
-    default:
-      return state
-  }
-}
+// export function teams(state = init, action) {
+//   switch (action.type) {
+//     case ACTION.SAVE_TEAMS:
+//       return { ...state, teams: action.payload }
+//     default:
+//       return state.teams
+//   }
+// }
 
-export function game(state = init, action) {
-  switch (action.type) {
-    default:
-      return state
-  }
-}
+// export function players(state = init, action) {
+//   switch (action.type) {
+//     default:
+//       return state.players
+//   }
+// }
+
+// export function game(state = init, action) {
+//   switch (action.type) {
+//     default:
+//       return state.game
+//   }
+// }

@@ -1,6 +1,7 @@
 import React from 'react'
 import MainMenu from './components/MainMenu'
 import TeamSetup from './components/Setup/TeamSetup'
+import WordSetup from './components/Setup/WordSetup'
 import { NavigationContainer } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
 
@@ -36,6 +37,14 @@ function AppNavigator() {
           component={TeamSetup}
           options={{
             title: 'Set up teams',
+            ...headerStyle,
+          }}
+        />
+        <Stack.Screen
+          name={CONST.ROUTE.SETUP_WORDS}
+          component={WordSetup}
+          options={{
+            title: 'Add some words',
             ...headerStyle,
           }}
         />

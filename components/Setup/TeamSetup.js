@@ -1,7 +1,7 @@
 import React, { Fragment, useState, useEffect } from 'react'
 import { connect } from 'react-redux'
 
-import { View, Text, Button, TextField } from 'react-native-ui-lib'
+import { ScrollBar, View, Text, Button, TextField } from 'react-native-ui-lib'
 
 import * as CONST from '../../constants'
 
@@ -9,7 +9,7 @@ function getRandomID() {
   return Math.floor(Math.random() * 10000)
 }
 
-function TeamSetup({ navigator, dispatch }) {
+function TeamSetup({ navigation, dispatch }) {
   const [teams, setTeams] = useState([])
 
   useEffect(addDefaultTeams, [])
@@ -26,7 +26,7 @@ function TeamSetup({ navigator, dispatch }) {
       type: CONST.ACTION.SAVE_TEAMS,
       payload: teams,
     })
-    // navigator.navigate(NEXT)
+    navigation.navigate(CONST.ROUTE.SETUP_WORDS)
   }
 
   function updateTeam(targetTeamID, newName) {
@@ -93,7 +93,7 @@ function TeamSetup({ navigator, dispatch }) {
   }
 
   return (
-    <>
+    <ScrollBar>
       <View paddingH-20 paddingT-40>
         {teams.map((team) => (
           <Fragment key={team.id}>
@@ -114,6 +114,7 @@ function TeamSetup({ navigator, dispatch }) {
                     }
                   />
                   <Button
+                    size="small"
                     label="Remove member"
                     onPress={() => removeMember(team.id, member.id)}
                   />
@@ -132,7 +133,7 @@ function TeamSetup({ navigator, dispatch }) {
       <View>
         <Button label="Continue" onPress={continueToNextScreen} />
       </View>
-    </>
+    </ScrollBar>
   )
 }
 

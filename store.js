@@ -1,10 +1,10 @@
 import { createStore, combineReducers } from 'redux'
-import { game, teams, players } from './reducers'
+import { reducer } from './reducers'
 
-const rootReducer = combineReducers({
-  game,
-  teams,
-  players,
-})
+// const rootReducer = combineReducers({
+//   game,
+//   teams,
+//   players,
+// })
 
-export const store = createStore(rootReducer)
+export const store = createStore(reducer)

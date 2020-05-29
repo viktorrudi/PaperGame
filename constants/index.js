@@ -1,6 +1,7 @@
 export const ROUTE = {
   MAIN_MENU: 'MAIN_MENU',
   SETUP_TEAM: 'SETUP_TEAM',
+  SETUP_WORDS: 'SETUP_WORDS',
 }
 
 export const ROUND_TYPE = {
