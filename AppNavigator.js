@@ -1,9 +1,12 @@
 import React from 'react'
+import { NavigationContainer } from '@react-navigation/native'
+import { createStackNavigator } from '@react-navigation/stack'
+
 import MainMenu from './components/MainMenu'
 import TeamSetup from './components/Setup/TeamSetup'
 import WordSetup from './components/Setup/WordSetup'
-import { NavigationContainer } from '@react-navigation/native'
-import { createStackNavigator } from '@react-navigation/stack'
+import Game from './components/Game'
+import GameEnd from './components/GameEnd'
 
 import * as CONST from './constants'
 
@@ -48,6 +51,16 @@ function AppNavigator() {
             ...headerStyle,
           }}
         />
+        <Stack.Screen
+          name={CONST.ROUTE.GAME}
+          component={Game}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name={CONST.ROUTE.GAME_END}
+          component={GameEnd}
+          options={{ headerShown: false }}
+        />
         {/* <Stack.Screen
           name="TaskSetup"
           component={TaskSetup}
@@ -63,10 +76,10 @@ function AppNavigator() {
         <Stack.Screen
           name="Task"
           component={Task}
-          // options={({ route }) => ({
-          //   title: route.params.category.name,
-          //   ...headerStyle,
-          // })}
+          options={({ route }) => ({
+            title: route.params.category.name,
+            ...headerStyle,
+          })}
         /> */}
       </Stack.Navigator>
     </NavigationContainer>

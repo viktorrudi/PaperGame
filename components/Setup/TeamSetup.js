@@ -1,13 +1,11 @@
 import React, { Fragment, useState, useEffect } from 'react'
 import { connect } from 'react-redux'
 
-import { ScrollBar, View, Text, Button, TextField } from 'react-native-ui-lib'
+import { ScrollView } from 'react-native'
+import { View, Button, TextField } from 'react-native-ui-lib'
 
 import * as CONST from '../../constants'
-
-function getRandomID() {
-  return Math.floor(Math.random() * 10000)
-}
+import * as UTIL from '../../utils'
 
 function TeamSetup({ navigation, dispatch }) {
   const [teams, setTeams] = useState([])
@@ -15,18 +13,7 @@ function TeamSetup({ navigation, dispatch }) {
   useEffect(addDefaultTeams, [])
 
   function addDefaultTeams() {
-    setTeams([
-      { id: 1, name: 'Team One', members: [{ id: 1, name: 'Doggo' }] },
-      { id: 2, name: 'Team Two', members: [{ id: 1, name: 'Kocicka' }] },
-    ])
-  }
-
-  function continueToNextScreen() {
-    dispatch({
-      type: CONST.ACTION.SAVE_TEAMS,
-      payload: teams,
-    })
-    navigation.navigate(CONST.ROUTE.SETUP_WORDS)
+    setTeams(CONST.DEFAULT.TEAMS)
   }
 
   function updateTeam(targetTeamID, newName) {
@@ -40,10 +27,11 @@ function TeamSetup({ navigation, dispatch }) {
   function updateMember(targetTeamID, targetMemberID, newName) {
     const updatedTeams = teams.map((team) => {
       if (team.id === targetTeamID) {
-        return team.members.map((member) => {
+        const updatedMembers = team.members.map((member) => {
           if (member.id === targetMemberID) return { ...member, name: newName }
           return member
         })
+        return { ...team, members: updatedMembers }
       }
       return team
     })
@@ -54,9 +42,12 @@ function TeamSetup({ navigation, dispatch }) {
     setTeams([
       ...teams,
       {
-        id: getRandomID(),
+        id: UTIL.getRandomID(),
         name: `New Team`,
-        members: [{ id: getRandomID(), name: 'New Member' }],
+        members: [
+          { id: UTIL.getRandomID(), name: 'New Member' },
+          { id: UTIL.getRandomID(), name: 'New Member' },
+        ],
       },
     ])
   }
@@ -64,7 +55,11 @@ function TeamSetup({ navigation, dispatch }) {
   function addMember(targetTeamID) {
     const updatedTeams = teams.map((team) => {
       if (team.id === targetTeamID) {
-        const newMember = { id: getRandomID(), name: `New Member` }
+        const newMember = {
+          id: UTIL.getRandomID(),
+          name: 'New Member',
+          teamID: team.id,
+        }
         return { ...team, members: [...team.members, newMember] }
       }
       return team
@@ -92,11 +87,19 @@ function TeamSetup({ navigation, dispatch }) {
     setTeams(updatedTeams)
   }
 
+  function continueToWordSetup() {
+    dispatch({
+      type: CONST.ACTION.SAVE_TEAMS,
+      payload: teams.map((team) => ({ ...team, ...CONST.DEFAULT.TEAM_PROPS })),
+    })
+    navigation.navigate(CONST.ROUTE.SETUP_WORDS)
+  }
+
   return (
-    <ScrollBar>
-      <View paddingH-20 paddingT-40>
+    <ScrollView>
+      <View paddingH-20>
         {teams.map((team) => (
-          <Fragment key={team.id}>
+          <View marginT-30 key={team.id}>
             <TextField
               text60
               placeholder={team.name}
@@ -105,7 +108,7 @@ function TeamSetup({ navigation, dispatch }) {
             <Button label="Remove Team" onPress={() => removeTeam(team.id)} />
             <View marginL-20>
               {team.members.map((member) => (
-                <Fragment key={member.id}>
+                <View marginT-20 key={member.id}>
                   <TextField
                     key={member.id}
                     placeholder={member.name}
@@ -114,11 +117,12 @@ function TeamSetup({ navigation, dispatch }) {
                     }
                   />
                   <Button
+                    marginB-20
                     size="small"
                     label="Remove member"
                     onPress={() => removeMember(team.id, member.id)}
                   />
-                </Fragment>
+                </View>
               ))}
               <Button
                 size="small"
@@ -126,20 +130,21 @@ function TeamSetup({ navigation, dispatch }) {
                 onPress={() => addMember(team.id)}
               />
             </View>
-          </Fragment>
+          </View>
         ))}
         <Button label="Add Team" onPress={addTeam} />
       </View>
       <View>
-        <Button label="Continue" onPress={continueToNextScreen} />
+        <Button
+          style={{ borderRadius: 0 }}
+          marginT-20
+          text30
+          label="Continue"
+          onPress={continueToWordSetup}
+        />
       </View>
-    </ScrollBar>
+    </ScrollView>
   )
 }
 
-const mapStateToProps = (state) => ({})
-// const mapDispatchToProps = (dispatch) => ({
-//   saveTeamsAction: (teams) => dispatch(saveTeams(teams)),
-// })
-
-export default connect(mapStateToProps, (dispatch) => ({ dispatch }))(TeamSetup)
+export default connect(null, (dispatch) => ({ dispatch }))(TeamSetup)
