@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
 
 import { ScrollView } from 'react-native'
@@ -8,29 +8,26 @@ import * as CONST from '../../constants'
 import * as UTIL from '../../utils'
 import * as API from '../../utils/api'
 
-const emptyWordGroup = Array(5)
-  .fill('')
-  .reduce((txt, _, i) => {
-    txt[i] = ''
-    return txt
-  }, {})
-
-function parseWords(wordGroup) {
+function nonEmptyWords(wordGroup) {
   return Object.values(wordGroup).filter((word) => word !== '')
 }
 
-function WordSetup({ navigation, dispatch, teams }) {
+function WordSetup({ navigation, dispatch, teams, gameSettings }) {
   const [isLastMember, setIsLastMember] = useState(false)
   const [currentMember, setCurrentMember] = useState({})
   const [memberQueue, setMemberQueue] = useState([])
 
   const [randomWords, setRandomWords] = useState([])
-  const [wordGroup, setWordGroup] = useState(emptyWordGroup)
+  const [wordGroup, setWordGroup] = useState({})
   const [allWords, setAllWords] = useState([])
 
   const [nextMember] = memberQueue
-  const hasEmptyFields = Object.values(wordGroup).includes('')
-  const hasDuplicates = checkHasDuplicates()
+  const needsMoreWords = nonEmptyWords(wordGroup).length < gameSettings.minWords
+
+  let continueButtonLabel = ''
+  if (!isLastMember) continueButtonLabel = `Continue to ${nextMember?.name}`
+  if (isLastMember) continueButtonLabel = 'Begin Game!'
+  if (needsMoreWords) continueButtonLabel = 'You still need to add more words'
 
   useEffect(initializeMemberQueue, [])
 
@@ -43,30 +40,31 @@ function WordSetup({ navigation, dispatch, teams }) {
 
       setCurrentMember(firstMember)
       setMemberQueue(allExceptFirst)
-      setWordGroup(emptyWordGroup)
+      setWordGroup(getEmptyWordGroup())
     }
   }
 
-  function checkHasDuplicates() {
-    const everyWord = [
-      ...Object.values(wordGroup),
-      ...allWords.flatMap(({ words }) => words),
-    ]
-    return new Set(everyWord).size !== everyWord.length
+  function getEmptyWordGroup() {
+    return Array(gameSettings.minWords)
+      .fill('')
+      .reduce((txt, _, i) => {
+        txt[i] = ''
+        return txt
+      }, {})
   }
 
   function getAllWords() {
     return [
       ...allWords,
       {
-        words: parseWords(wordGroup),
+        words: nonEmptyWords(wordGroup),
         owner: { teamID: currentMember.teamID, member: currentMember },
       },
     ]
   }
 
   function queueNextMember() {
-    setWordGroup(emptyWordGroup)
+    setWordGroup(getEmptyWordGroup())
     setIsLastMember(memberQueue.length === 1)
     setAllWords(getAllWords())
 
@@ -99,37 +97,45 @@ function WordSetup({ navigation, dispatch, teams }) {
   return (
     <ScrollView>
       <View flex>
-        <View paddingH-20 paddingT-20>
-          <Text text30 blue30 center>
-            Hey {currentMember.name}, add 5 words!
+        <View paddingH-20>
+          <Text text30 blue30 marginV-40 center>
+            Hey {currentMember.name}, add some words!
           </Text>
-          <View flex>
+          <View>
             {Object.entries(wordGroup).map(([wordIndex, word]) => (
-              <Fragment key={wordIndex}>
+              <View
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  flexWrap: 'wrap',
+                  alignItems: 'baseline',
+                }}
+                key={wordIndex}
+              >
                 <TextField
                   text60
                   value={word}
-                  style={{ flexGrow: 1 }}
+                  style={{ width: '78%' }}
                   placeholder={`Word #${parseInt(wordIndex) + 1}`}
                   onChangeText={(text) => addTextToWordGroup(wordIndex, text)}
                 />
                 <Button
                   size="small"
-                  label="Get random word"
+                  outline
+                  style={{ flexGrow: 1, height: 30, marginLeft: 10 }}
+                  label="R"
                   onPress={() => addRandomWord(wordIndex)}
                 />
-              </Fragment>
+              </View>
             ))}
           </View>
         </View>
         <Button
-          style={{ borderRadius: 0 }}
-          marginT-20
-          text30
-          label={
-            isLastMember ? 'Begin game!' : `Continue to ${nextMember?.name}`
-          }
-          // disabled={hasEmptyFields || hasDuplicates}
+          marginV-20
+          marginH-20
+          text60
+          label={continueButtonLabel}
+          disabled={needsMoreWords}
           onPress={isLastMember ? beginGame : queueNextMember}
         />
       </View>
@@ -139,6 +145,7 @@ function WordSetup({ navigation, dispatch, teams }) {
 
 const mapStateToProps = (state) => ({
   teams: state.teams || [],
+  gameSettings: state.gameSettings || [],
 })
 
 export default connect(mapStateToProps, (dispatch) => ({ dispatch }))(WordSetup)

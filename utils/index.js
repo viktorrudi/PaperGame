@@ -16,8 +16,25 @@ export function getRandomID() {
   return Math.floor(Math.random() * 10000)
 }
 
+export function getWinner(teams) {
+  let winner = {}
+  Object.entries(teams).forEach(([team, score], i, allTeams) => {
+    if (i === 0) {
+      winner.team = team
+      winner.score = score
+    }
+    if (i > 0) {
+      const [_, prevTeamScore] = i > 0 ? allTeams[i - 1] : allTeams[0]
+      if (prevTeamScore < score) {
+        winner.team = team
+        winner.score = score
+      }
+    }
+  })
+  return winner
+}
+
 export function generateQueues(players) {
-  console.log({ players })
   const uniq = [...new Set(players.map(({ teamID }) => teamID))]
   let helper = {}
   uniq.forEach((teamID) => {
@@ -26,7 +43,27 @@ export function generateQueues(players) {
       .map((playerGroup) => playerGroup.id)
   })
 
-  return Object.entries(helper).map(([teamID, playerIDs]) => {
-    return { teamID: parseInt(teamID), playerIDs }
+  const helperArray = Object.entries(helper).map(([teamID, tempPlayerIDs]) => {
+    return { teamID: parseInt(teamID), tempPlayerIDs }
   })
+
+  const duplicates = [...helperArray, ...helperArray]
+  let members = duplicates.map((team, i) => {
+    if (i < duplicates.length / 2) {
+      const playerID = team.tempPlayerIDs[0]
+      return {
+        ...team,
+        id: playerID,
+        name: players.find((p) => p.id === playerID).name,
+      }
+    }
+    const playerID = team.tempPlayerIDs[1]
+    return {
+      ...team,
+      id: playerID,
+      name: players.find((p) => p.id === playerID).name,
+    }
+  })
+  members.forEach((member) => delete member.tempPlayerIDs)
+  return members
 }

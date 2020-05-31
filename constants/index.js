@@ -9,17 +9,26 @@ export const ROUND_TYPE = {
   },
 }
 
+export const ROUND_TYPE_HINT = {
+  EXPLAIN:
+    'You can fully explain the word, except for using the word or something which rhymes with it.',
+  ONE_WORD: 'You can only use one word to explain your given word.',
+  MIME: 'No talking! You must use your body to explain the given word.',
+}
+
 export const ROUNDS = [ROUND_TYPE.EXPLAIN, ROUND_TYPE.ONE_WORD, ROUND_TYPE.MIME]
 
 export const ROUTE = {
   MAIN_MENU: 'MAIN_MENU',
+  GAME_SETTINGS: 'GAME_SETTINGS',
   SETUP_TEAM: 'SETUP_TEAM',
   SETUP_WORDS: 'SETUP_WORDS',
-  GAME: 'GAME',
   GAME_END: 'GAME_END',
+  GAME: 'GAME',
 }
 
 export const ACTION = {
+  UPDATE_GAME_SETTINGS: 'UPDATE_GAME_SETTINGS',
   SAVE_TEAMS: 'SAVE_TEAMS',
   SAVE_WORDS: 'SAVE_WORDS',
   RESTART: 'RESTART',

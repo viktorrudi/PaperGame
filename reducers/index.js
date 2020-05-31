@@ -1,6 +1,11 @@
 import { ACTION, ROUNDS } from '../constants'
 
 const init = {
+  gameSettings: {
+    roundTimer: 30,
+    powerPointsPerRound: 5,
+    minWords: 3,
+  },
   userInputs: [],
   // { words: [strings], owner: { teamID: id, member: {member} } }
   teams: [],
@@ -10,7 +15,13 @@ const init = {
 export function reducer(state = init, action) {
   switch (action.type) {
     case ACTION.RESTART:
-      return init
+      return { ...state, userInputs: init.userInputs, teams: init.userInputs }
+    case ACTION.UPDATE_GAME_SETTINGS:
+      console.log(action.payload)
+      return {
+        ...state,
+        gameSettings: { ...state.gameSettings, ...action.payload },
+      }
     case ACTION.SAVE_TEAMS:
       return { ...state, teams: action.payload }
     case ACTION.SAVE_WORDS:

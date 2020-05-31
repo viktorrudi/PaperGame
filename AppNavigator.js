@@ -3,6 +3,7 @@ import { NavigationContainer } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
 
 import MainMenu from './components/MainMenu'
+import GameSettings from './components/GameSettings'
 import TeamSetup from './components/Setup/TeamSetup'
 import WordSetup from './components/Setup/WordSetup'
 import Game from './components/Game'
@@ -32,6 +33,14 @@ function AppNavigator() {
           component={MainMenu}
           options={{
             title: 'Paper Game',
+            ...headerStyle,
+          }}
+        />
+        <Stack.Screen
+          name={CONST.ROUTE.GAME_SETTINGS}
+          component={GameSettings}
+          options={{
+            title: 'Settings',
             ...headerStyle,
           }}
         />

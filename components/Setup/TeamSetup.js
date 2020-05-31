@@ -98,47 +98,72 @@ function TeamSetup({ navigation, dispatch }) {
   return (
     <ScrollView>
       <View paddingH-20>
-        {teams.map((team) => (
-          <View marginT-30 key={team.id}>
-            <TextField
-              text60
-              placeholder={team.name}
-              onChangeText={(newName) => updateTeam(team.id, newName)}
-            />
-            <Button label="Remove Team" onPress={() => removeTeam(team.id)} />
-            <View marginL-20>
-              {team.members.map((member) => (
-                <View marginT-20 key={member.id}>
-                  <TextField
-                    key={member.id}
-                    placeholder={member.name}
-                    onChangeText={(memberName) =>
-                      updateMember(team.id, member.id, memberName)
-                    }
-                  />
-                  <Button
-                    marginB-20
-                    size="small"
-                    label="Remove member"
-                    onPress={() => removeMember(team.id, member.id)}
-                  />
-                </View>
-              ))}
-              <Button
-                size="small"
-                label="Add Member"
-                onPress={() => addMember(team.id)}
+        {teams.map((team, i) => {
+          const isDeleteable = i >= 2
+          return (
+            <View
+              marginT-30
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                flexWrap: 'wrap',
+              }}
+              key={team.id}
+            >
+              <TextField
+                text60
+                style={{ width: isDeleteable ? '78%' : '100%' }}
+                placeholder={team.name}
+                onChangeText={(newName) => updateTeam(team.id, newName)}
               />
+              {isDeleteable && (
+                <Button
+                  style={{
+                    height: 30,
+                    marginLeft: 10,
+                    flexGrow: 1,
+                    padding: 0,
+                  }}
+                  outline
+                  size="small"
+                  label="X"
+                  onPress={() => removeTeam(team.id)}
+                />
+              )}
+              <View style={{ flexGrow: 1 }} marginL-30>
+                {team.members.map((member) => (
+                  <View key={member.id}>
+                    <TextField
+                      key={member.id}
+                      placeholder={member.name}
+                      onChangeText={(memberName) =>
+                        updateMember(team.id, member.id, memberName)
+                      }
+                    />
+                    {/* <Button
+                      marginB-20
+                      size="small"
+                      label="Remove member"
+                      onPress={() => removeMember(team.id, member.id)}
+                    /> */}
+                  </View>
+                ))}
+                {/* <Button
+                  size="small"
+                  label="Add Member"
+                  onPress={() => addMember(team.id)}
+                /> */}
+              </View>
             </View>
-          </View>
-        ))}
-        <Button label="Add Team" onPress={addTeam} />
+          )
+        })}
+        <Button outline label="+ Add Team" onPress={addTeam} />
       </View>
       <View>
         <Button
-          style={{ borderRadius: 0 }}
-          marginT-20
-          text30
+          marginV-20
+          marginH-20
+          text60
           label="Continue"
           onPress={continueToWordSetup}
         />
