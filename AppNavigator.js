@@ -31,10 +31,7 @@ function AppNavigator() {
         <Stack.Screen
           name={CONST.ROUTE.MAIN_MENU}
           component={MainMenu}
-          options={{
-            title: 'Paper Game',
-            ...headerStyle,
-          }}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name={CONST.ROUTE.GAME_SETTINGS}

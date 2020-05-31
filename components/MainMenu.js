@@ -5,8 +5,11 @@ import * as CONST from '../constants'
 export default function MainMenu({ navigation }) {
   return (
     <View flex center>
-      <Text text50 marginB-30 blue30>
-        Welcome to Paper Game!
+      <Text text20 blue30>
+        Paper Game
+      </Text>
+      <Text text80 marginB-30 grey40>
+        v.0.0.1
       </Text>
       <Button
         text40
