@@ -17,7 +17,6 @@ export function reducer(state = init, action) {
     case ACTION.RESTART:
       return { ...state, userInputs: init.userInputs, teams: init.userInputs }
     case ACTION.UPDATE_GAME_SETTINGS:
-      console.log(action.payload)
       return {
         ...state,
         gameSettings: { ...state.gameSettings, ...action.payload },

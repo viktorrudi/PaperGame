@@ -11,16 +11,16 @@ function GameSettings({ navigation, dispatch, gameSettings }) {
   const [roundTimer, setRoundTimer] = useState(
     gameSettings.roundTimer.toString()
   )
-  const [powerPointsPerRound, setPowerPointsPerRound] = useState(
-    gameSettings.powerPointsPerRound.toString()
-  )
+  // const [powerPointsPerRound, setPowerPointsPerRound] = useState(
+  //   gameSettings.powerPointsPerRound.toString()
+  // )
 
   function saveSettings() {
     dispatch({
       type: CONST.ACTION.UPDATE_GAME_SETTINGS,
       payload: {
         roundTimer: parseInt(roundTimer.trim()),
-        powerPointsPerRound: parseInt(powerPointsPerRound.trim()),
+        // powerPointsPerRound: parseInt(powerPointsPerRound.trim()),
         minWords: parseInt(minWords.trim()),
       },
     })
@@ -28,17 +28,8 @@ function GameSettings({ navigation, dispatch, gameSettings }) {
   }
 
   function checkForErrors() {
-    if (
-      minWords.length === 0 ||
-      roundTimer.length === 0 ||
-      powerPointsPerRound.length === 0
-    ) {
-      return true
-    }
-    if (isNaN(minWords) || isNaN(roundTimer) || isNaN(powerPointsPerRound)) {
-      return true
-    }
-    return false
+    const states = [minWords, roundTimer]
+    return states.some((state) => state.length === 0 || isNaN(state))
   }
 
   return (
@@ -52,14 +43,14 @@ function GameSettings({ navigation, dispatch, gameSettings }) {
           keyboardType="numeric"
           onChangeText={(timer) => setRoundTimer(timer)}
         />
-        <TextField
+        {/* <TextField
           text30
           title="Teams starting Power Points per round"
           floatOnFocus
           value={powerPointsPerRound}
           keyboardType="numeric"
           onChangeText={(points) => setPowerPointsPerRound(points)}
-        />
+        /> */}
         <TextField
           text30
           title="Minimum required words per player"

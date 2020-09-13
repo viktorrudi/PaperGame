@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useMemo, useEffect, useRef } from 'react'
 import { Vibration } from 'react-native'
 import { connect } from 'react-redux'
 
@@ -27,6 +27,7 @@ function Game({ navigation, teams, userInputs, gameSettings, dispatch }) {
   const playerTimerRef = useRef(null)
   const [playerTimeleft, setPlayerTimeLeft] = useState(null)
 
+  const [isWelcomeShowing, setIsWelcomeShowing] = useState(true)
   const [wordToGuess, setWordToGuess] = useState(init.wordToGuess)
   const [guessedWords, setGuessedWords] = useState([])
   const [unguessedWords, setUnguessedWords] = useState(init.unguessedWords)
@@ -35,19 +36,21 @@ function Game({ navigation, teams, userInputs, gameSettings, dispatch }) {
   const [round, setRound] = useState(CONST.ROUNDS[0])
   const [isPlayerReady, setIsPlayerReady] = useState(false)
   const [scores, setScores] = useState(init.scores)
+
+  const [showSkipTurnDialog, setShowSkipTurnDialog] = useState(false)
   const [showEndGameDialog, setShowEndGameDialog] = useState(false)
   const [showRoundTypeHint, setShowRoundTypeHint] = useState(false)
-
   const roundIndex = CONST.ROUNDS.findIndex((type) => round === type)
   const nextRound = CONST.ROUNDS[roundIndex + 1]
   const wasLastRound = roundIndex === CONST.ROUNDS.length - 1
 
   const allMembers = teams.flatMap(({ members }) => members)
-  const playerQueue = UTIL.generateQueues(allMembers)
+  const playerQueue = useMemo(() => UTIL.generateQueues(allMembers), [])
   const currentPlayer = playerQueue[queueIndex]
   const isLastPlayer = queueIndex === playerQueue.length - 1
 
   const noMoreQuestions = unguessedWords.length === 0
+  const gameIsOver = wasLastRound && noMoreQuestions
 
   useEffect(handleTimer, [playerTimeleft])
   useEffect(checkIfGameOver, [wasLastRound, noMoreQuestions])
@@ -71,7 +74,7 @@ function Game({ navigation, teams, userInputs, gameSettings, dispatch }) {
   }
 
   function checkIfGameOver() {
-    if (wasLastRound && noMoreQuestions) {
+    if (gameIsOver) {
       navigation.navigate(CONST.ROUTE.GAME_END, { scores })
     }
   }
@@ -106,6 +109,11 @@ function Game({ navigation, teams, userInputs, gameSettings, dispatch }) {
     setRound(nextRound)
   }
 
+  function skipPlayerTurn() {
+    setShowSkipTurnDialog(false)
+    setPlayerTimeLeft(0)
+  }
+
   function onPlayerConfirm() {
     setWordToGuess(UTIL.shuffle(unguessedWords)[0])
     setIsPlayerReady(true)
@@ -117,27 +125,56 @@ function Game({ navigation, teams, userInputs, gameSettings, dispatch }) {
     navigation.navigate(CONST.ROUTE.MAIN_MENU)
   }
 
-  if (noMoreQuestions) {
-    return wasLastRound ? null : (
+  if (gameIsOver) return null
+
+  if (isWelcomeShowing) {
+    return (
       <View flex center>
-        <Text text40>Round over. Next round is:</Text>
-        <Text text20 blue30 marginB-30>
+        <Text text40 marginB-10>
+          First round is
+        </Text>
+        <Text text20 blue30>
+          {CONST.ROUND_TYPE.display[round]}
+        </Text>
+        <Text center marginB-30>
+          {CONST.ROUND_TYPE_HINT[round]}
+        </Text>
+        <Button
+          text30
+          label="Let's get started!"
+          onPress={() => setIsWelcomeShowing(false)}
+        />
+      </View>
+    )
+  }
+
+  if (noMoreQuestions) {
+    return (
+      <View flex center>
+        <Text text40 marginB-10>
+          Round over. Next round is:
+        </Text>
+        <Text text20 blue30>
           {CONST.ROUND_TYPE.display[nextRound]}
+        </Text>
+        <Text center marginB-30>
+          {CONST.ROUND_TYPE_HINT[nextRound]}
         </Text>
         <Button text30 label="Let's go!" onPress={gotoNextRound} />
       </View>
     )
   }
   if (!isPlayerReady) {
+    const currentTeam = teams.find((team) => team.id === currentPlayer.teamID)
     return (
       <View flex center>
         <Text center text40 marginB-30>
-          {`Hand the phone to ${currentPlayer.name} in ${UTIL.getMemberTeamName(
-            teams,
-            currentPlayer.teamID
-          )}`}
+          {`Hand the phone to ${currentPlayer.name} in ${currentTeam.name}`}
         </Text>
         <Button text30 label="I'm ready!" onPress={onPlayerConfirm} />
+        <Text center marginT-10>
+          {CONST.ROUND_TYPE_HINT[round]}
+        </Text>
       </View>
     )
   }
@@ -165,12 +202,36 @@ function Game({ navigation, teams, userInputs, gameSettings, dispatch }) {
           />
         </View>
       </Dialog>
+
+      <Dialog
+        visible={showSkipTurnDialog}
+        onDismiss={() => setShowSkipTurnDialog(false)}
+      >
+        <View>
+          <Text center text40 white>
+            Are you sure you want to skip your turn?
+          </Text>
+          <Button
+            bg-red30
+            text40
+            marginV-20
+            label="Skip turn"
+            onPress={skipPlayerTurn}
+          />
+          <Button
+            text40
+            label="Continue Playing"
+            onPress={() => setShowSkipTurnDialog(false)}
+          />
+        </View>
+      </Dialog>
+
       <View flex center style={{ height: '100%' }}>
         <Text text20 center marginB-30>
           {playerTimeleft}
         </Text>
         <Text text60 center>
-          Your word
+          Your word is
         </Text>
         <Text text10 marginB-30 blue30 center marginH-20>
           {wordToGuess}
@@ -187,6 +248,13 @@ function Game({ navigation, teams, userInputs, gameSettings, dispatch }) {
             </Text>
           </View>
         )}
+        <Button
+          size="medium"
+          backgroundColor="#c0c0c0"
+          marginT-20
+          label="End my turn"
+          onPress={() => setShowSkipTurnDialog(true)}
+        />
         <ActionBar
           actions={[
             {
