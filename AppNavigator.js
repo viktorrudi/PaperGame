@@ -24,69 +24,52 @@ const headerStyle = {
   gestureDirection: 'horizontal',
 }
 
+const screens = {
+  [CONST.ROUTE.MAIN_MENU]: {
+    Component: MainMenu,
+  },
+  [CONST.ROUTE.GAME]: {
+    Component: Game,
+  },
+  [CONST.ROUTE.GAME_END]: {
+    Component: GameEnd,
+  },
+  [CONST.ROUTE.GAME_SETTINGS]: {
+    Component: GameSettings,
+    options: {
+      title: 'Settings',
+      ...headerStyle,
+    },
+  },
+  [CONST.ROUTE.SETUP_TEAM]: {
+    Component: TeamSetup,
+    options: {
+      title: 'Set up teams',
+      ...headerStyle,
+    },
+  },
+  [CONST.ROUTE.SETUP_WORDS]: {
+    Component: WordSetup,
+    options: {
+      title: 'Add some words',
+      ...headerStyle,
+    },
+  },
+}
 function AppNavigator() {
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        <Stack.Screen
-          name={CONST.ROUTE.MAIN_MENU}
-          component={MainMenu}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name={CONST.ROUTE.GAME_SETTINGS}
-          component={GameSettings}
-          options={{
-            title: 'Settings',
-            ...headerStyle,
-          }}
-        />
-        <Stack.Screen
-          name={CONST.ROUTE.SETUP_TEAM}
-          component={TeamSetup}
-          options={{
-            title: 'Set up teams',
-            ...headerStyle,
-          }}
-        />
-        <Stack.Screen
-          name={CONST.ROUTE.SETUP_WORDS}
-          component={WordSetup}
-          options={{
-            title: 'Add some words',
-            ...headerStyle,
-          }}
-        />
-        <Stack.Screen
-          name={CONST.ROUTE.GAME}
-          component={Game}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name={CONST.ROUTE.GAME_END}
-          component={GameEnd}
-          options={{ headerShown: false }}
-        />
-        {/* <Stack.Screen
-          name="TaskSetup"
-          component={TaskSetup}
-          // options={{
-          //   title: 'Categories',
-          //   headerRight: () =>
-          //     totalCorrect > 0 && (
-          //       <Button title={`Total Score: ${String(totalCorrect)}`} />
-          //     ),
-          //   ...headerStyle,
-          // }}
-        />
-        <Stack.Screen
-          name="Task"
-          component={Task}
-          options={({ route }) => ({
-            title: route.params.category.name,
-            ...headerStyle,
-          })}
-        /> */}
+        {Object.entries(screens).map(
+          ([routeRef, { Component, options = { headerShown: false } }]) => (
+            <Stack.Screen
+              key={routeRef}
+              name={routeRef}
+              component={Component}
+              options={options}
+            />
+          )
+        )}
       </Stack.Navigator>
     </NavigationContainer>
   )
