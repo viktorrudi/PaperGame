@@ -9,7 +9,7 @@ export default function MainMenu({ navigation }) {
         Paper Game
       </Text>
       <Text text80 marginB-30 grey40>
-        v.0.0.1
+        v{CONST.VERSION_NUMBER}
       </Text>
       <Button
         text40

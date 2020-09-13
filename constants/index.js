@@ -1,3 +1,5 @@
+export const VERSION_NUMBER = '0.0.2'
+
 export const ROUND_TYPE = {
   EXPLAIN: 'EXPLAIN',
   ONE_WORD: 'ONE_WORD',

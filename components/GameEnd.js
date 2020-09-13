@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react'
+import React from 'react'
 import { connect } from 'react-redux'
 
 import { ScrollView } from 'react-native'
@@ -66,7 +66,7 @@ function GameEnd({ navigation, route, dispatch, userInputs, teams }) {
             Words and their creators
           </Text>
           {userInputs.map(({ owner, words }) => (
-            <View style={{ marginTop: 5 }}>
+            <View key={owner.member.name} style={{ marginTop: 5 }}>
               <Text style={{ fontWeight: 'bold' }}>{owner.member.name}</Text>
               <Text>{words.join(', ')}</Text>
             </View>

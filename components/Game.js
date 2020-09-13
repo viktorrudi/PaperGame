@@ -13,8 +13,14 @@ import {
 import * as CONST from '../constants'
 import * as UTIL from '../utils'
 
-function Game({ navigation, teams, userInputs, gameSettings, dispatch }) {
-  const allWords = userInputs?.flatMap(({ words }) => words) ?? []
+function Game({
+  navigation,
+  teams = [],
+  userInputs = [],
+  gameSettings = {},
+  dispatch,
+}) {
+  const allWords = userInputs.flatMap(({ words }) => words)
   const init = {
     scores: teams.reduce((scores, team) => {
       scores[team.name] = 0
@@ -40,6 +46,7 @@ function Game({ navigation, teams, userInputs, gameSettings, dispatch }) {
   const [showSkipTurnDialog, setShowSkipTurnDialog] = useState(false)
   const [showEndGameDialog, setShowEndGameDialog] = useState(false)
   const [showRoundTypeHint, setShowRoundTypeHint] = useState(false)
+
   const roundIndex = CONST.ROUNDS.findIndex((type) => round === type)
   const nextRound = CONST.ROUNDS[roundIndex + 1]
   const wasLastRound = roundIndex === CONST.ROUNDS.length - 1
@@ -49,21 +56,21 @@ function Game({ navigation, teams, userInputs, gameSettings, dispatch }) {
   const currentPlayer = playerQueue[queueIndex]
   const isLastPlayer = queueIndex === playerQueue.length - 1
 
-  const noMoreQuestions = unguessedWords.length === 0
-  const gameIsOver = wasLastRound && noMoreQuestions
+  const isRoundOver = unguessedWords.length === 0
+  const isGameOver = wasLastRound && isRoundOver
 
   useEffect(handleTimer, [playerTimeleft])
-  useEffect(checkIfGameOver, [wasLastRound, noMoreQuestions])
+  useEffect(onGameOver, [isGameOver])
 
   function handleTimer() {
-    if (isPlayerReady) {
-      playerTimerRef.current = setTimeout(
-        () => setPlayerTimeLeft(playerTimeleft - 1),
-        1000
-      )
-    }
+    if (!isPlayerReady) return
 
-    if (playerTimeleft <= 0 && isPlayerReady && !noMoreQuestions) {
+    playerTimerRef.current = setTimeout(
+      () => setPlayerTimeLeft(playerTimeleft - 1),
+      1000
+    )
+
+    if (playerTimeleft <= 0 && !isRoundOver) {
       setShowEndGameDialog(false)
       setIsPlayerReady(false)
 
@@ -73,8 +80,8 @@ function Game({ navigation, teams, userInputs, gameSettings, dispatch }) {
     }
   }
 
-  function checkIfGameOver() {
-    if (gameIsOver) {
+  function onGameOver() {
+    if (isGameOver) {
       navigation.navigate(CONST.ROUTE.GAME_END, { scores })
     }
   }
@@ -125,7 +132,7 @@ function Game({ navigation, teams, userInputs, gameSettings, dispatch }) {
     navigation.navigate(CONST.ROUTE.MAIN_MENU)
   }
 
-  if (gameIsOver) return null
+  if (isGameOver) return null
 
   if (isWelcomeShowing) {
     return (
@@ -148,7 +155,7 @@ function Game({ navigation, teams, userInputs, gameSettings, dispatch }) {
     )
   }
 
-  if (noMoreQuestions) {
+  if (isRoundOver) {
     return (
       <View flex center>
         <Text text40 marginB-10>
@@ -209,13 +216,13 @@ function Game({ navigation, teams, userInputs, gameSettings, dispatch }) {
       >
         <View>
           <Text center text40 white>
-            Are you sure you want to skip your turn?
+            Are you sure you want to end your turn?
           </Text>
           <Button
             bg-red30
             text40
             marginV-20
-            label="Skip turn"
+            label="End turn"
             onPress={skipPlayerTurn}
           />
           <Button
