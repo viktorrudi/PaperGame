@@ -1,4 +1,5 @@
 export const VERSION_NUMBER = '0.0.2'
+export const GITHUB_REPO_URL = 'https://github.com/viktorrudi/PaperGame'
 
 export const ROUND_TYPE = {
   EXPLAIN: 'EXPLAIN',

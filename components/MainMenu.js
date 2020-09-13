@@ -1,6 +1,8 @@
 import React from 'react'
-import { View, Text, Button } from 'react-native-ui-lib'
+import { TouchableHighlight, Linking } from 'react-native'
+import { View, Text, Button, Image } from 'react-native-ui-lib'
 import * as CONST from '../constants'
+import githubLogo from '../assets/github-logo.png'
 
 export default function MainMenu({ navigation }) {
   return (
@@ -24,6 +26,18 @@ export default function MainMenu({ navigation }) {
         style={{ width: '70%' }}
         onPress={() => navigation.navigate(CONST.ROUTE.GAME_SETTINGS)}
       />
+      <TouchableHighlight
+        style={{ position: 'absolute', bottom: 10, right: 10 }}
+        onPress={() => Linking.openURL(CONST.GITHUB_REPO_URL)}
+      >
+        <Image
+          style={{
+            width: 40,
+            height: 40,
+          }}
+          source={githubLogo}
+        />
+      </TouchableHighlight>
     </View>
   )
 }
