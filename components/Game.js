@@ -1,6 +1,6 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react'
-import { Vibration } from 'react-native'
-import { connect } from 'react-redux'
+import React, { useState, useMemo, useEffect, useRef } from "react";
+import { Vibration } from "react-native";
+import { connect } from "react-redux";
 
 import {
   View,
@@ -9,9 +9,9 @@ import {
   ActionBar,
   Dialog,
   Hint,
-} from 'react-native-ui-lib'
-import * as CONST from '../constants'
-import * as UTIL from '../utils'
+} from "react-native-ui-lib";
+import * as CONST from "../constants";
+import * as UTIL from "../utils";
 
 function Game({
   navigation,
@@ -20,119 +20,119 @@ function Game({
   gameSettings = {},
   dispatch,
 }) {
-  const allWords = userInputs.flatMap(({ words }) => words)
+  const allWords = userInputs.flatMap(({ words }) => words);
   const init = {
     scores: teams.reduce((scores, team) => {
-      scores[team.name] = 0
-      return scores
+      scores[team.name] = 0;
+      return scores;
     }, {}),
     unguessedWords: allWords,
     wordToGuess: UTIL.getRandomWord(allWords),
-  }
+  };
 
-  const playerTimerRef = useRef(null)
-  const [playerTimeleft, setPlayerTimeLeft] = useState(null)
+  const playerTimerRef = useRef(null);
+  const [playerTimeleft, setPlayerTimeLeft] = useState(null);
 
-  const [isWelcomeShowing, setIsWelcomeShowing] = useState(true)
-  const [wordToGuess, setWordToGuess] = useState(init.wordToGuess)
-  const [guessedWords, setGuessedWords] = useState([])
-  const [unguessedWords, setUnguessedWords] = useState(init.unguessedWords)
+  const [isWelcomeShowing, setIsWelcomeShowing] = useState(true);
+  const [wordToGuess, setWordToGuess] = useState(init.wordToGuess);
+  const [guessedWords, setGuessedWords] = useState([]);
+  const [unguessedWords, setUnguessedWords] = useState(init.unguessedWords);
 
-  const [queueIndex, setQueueIndex] = useState(0)
-  const [round, setRound] = useState(CONST.ROUNDS[0])
-  const [isPlayerReady, setIsPlayerReady] = useState(false)
-  const [scores, setScores] = useState(init.scores)
+  const [queueIndex, setQueueIndex] = useState(0);
+  const [round, setRound] = useState(CONST.ROUNDS[0]);
+  const [isPlayerReady, setIsPlayerReady] = useState(false);
+  const [scores, setScores] = useState(init.scores);
 
-  const [showSkipTurnDialog, setShowSkipTurnDialog] = useState(false)
-  const [showEndGameDialog, setShowEndGameDialog] = useState(false)
-  const [showRoundTypeHint, setShowRoundTypeHint] = useState(false)
+  const [showSkipTurnDialog, setShowSkipTurnDialog] = useState(false);
+  const [showEndGameDialog, setShowEndGameDialog] = useState(false);
+  const [showRoundTypeHint, setShowRoundTypeHint] = useState(false);
 
-  const roundIndex = CONST.ROUNDS.findIndex((type) => round === type)
-  const nextRound = CONST.ROUNDS[roundIndex + 1]
-  const wasLastRound = roundIndex === CONST.ROUNDS.length - 1
+  const roundIndex = CONST.ROUNDS.findIndex((type) => round === type);
+  const nextRound = CONST.ROUNDS[roundIndex + 1];
+  const wasLastRound = roundIndex === CONST.ROUNDS.length - 1;
 
-  const allMembers = teams.flatMap(({ members }) => members)
-  const playerQueue = useMemo(() => UTIL.generateQueues(allMembers), [])
-  const currentPlayer = playerQueue[queueIndex]
-  const isLastPlayer = queueIndex === playerQueue.length - 1
+  const allMembers = teams.flatMap(({ members }) => members);
+  const playerQueue = useMemo(() => UTIL.generateQueues(allMembers), []);
+  const currentPlayer = playerQueue[queueIndex];
+  const isLastPlayer = queueIndex === playerQueue.length - 1;
 
-  const isRoundOver = unguessedWords.length === 0
-  const isGameOver = wasLastRound && isRoundOver
+  const isRoundOver = unguessedWords.length === 0;
+  const isGameOver = wasLastRound && isRoundOver;
 
-  useEffect(handleTimer, [playerTimeleft])
-  useEffect(onGameOver, [isGameOver])
+  useEffect(handleTimer, [playerTimeleft]);
+  useEffect(onGameOver, [isGameOver]);
 
   function handleTimer() {
-    if (!isPlayerReady) return
+    if (!isPlayerReady) return;
 
     playerTimerRef.current = setTimeout(
       () => setPlayerTimeLeft(playerTimeleft - 1),
       1000
-    )
+    );
 
     if (playerTimeleft <= 0 && !isRoundOver) {
-      setShowEndGameDialog(false)
-      setIsPlayerReady(false)
+      setShowEndGameDialog(false);
+      setIsPlayerReady(false);
 
-      Vibration.vibrate(1000)
-      clearTimeout(playerTimerRef.current)
-      setQueueIndex(isLastPlayer ? 0 : queueIndex + 1)
+      Vibration.vibrate(1000);
+      clearTimeout(playerTimerRef.current);
+      setQueueIndex(isLastPlayer ? 0 : queueIndex + 1);
     }
   }
 
   function onGameOver() {
     if (isGameOver) {
-      navigation.navigate(CONST.ROUTE.GAME_END, { scores })
+      navigation.navigate(CONST.ROUTE.GAME_END, { scores });
     }
   }
 
   function toggleRoundHint() {
-    setShowRoundTypeHint(!showRoundTypeHint)
+    setShowRoundTypeHint(!showRoundTypeHint);
   }
 
   function updateScore() {
-    const team = teams.find((team) => team.id === currentPlayer.teamID)
-    const newScore = { [team.name]: scores[team.name] + 1 }
-    setScores({ ...scores, ...newScore })
+    const team = teams.find((team) => team.id === currentPlayer.teamID);
+    const newScore = { [team.name]: scores[team.name] + 1 };
+    setScores({ ...scores, ...newScore });
   }
 
   function handleGuessedWord(guessedWord) {
-    updateScore()
-    Vibration.vibrate(100)
+    updateScore();
+    Vibration.vibrate(100);
 
-    setGuessedWords([...guessedWords, guessedWord])
-    const filteredWords = unguessedWords.filter((word) => word !== guessedWord)
-    setUnguessedWords(filteredWords)
+    setGuessedWords([...guessedWords, guessedWord]);
+    const filteredWords = unguessedWords.filter((word) => word !== guessedWord);
+    setUnguessedWords(filteredWords);
 
     if (filteredWords.length > 0) {
-      setWordToGuess(UTIL.getRandomWord(filteredWords))
+      setWordToGuess(UTIL.getRandomWord(filteredWords));
     }
   }
 
   function gotoNextRound() {
-    setQueueIndex(isLastPlayer ? 0 : queueIndex + 1)
-    setUnguessedWords(init.unguessedWords)
-    setIsPlayerReady(false)
-    setRound(nextRound)
+    setQueueIndex(isLastPlayer ? 0 : queueIndex + 1);
+    setUnguessedWords(init.unguessedWords);
+    setIsPlayerReady(false);
+    setRound(nextRound);
   }
 
   function skipPlayerTurn() {
-    setShowSkipTurnDialog(false)
-    setPlayerTimeLeft(0)
+    setShowSkipTurnDialog(false);
+    setPlayerTimeLeft(0);
   }
 
   function onPlayerConfirm() {
-    setWordToGuess(UTIL.shuffle(unguessedWords)[0])
-    setIsPlayerReady(true)
-    setPlayerTimeLeft(gameSettings.roundTimer)
+    setWordToGuess(UTIL.shuffle(unguessedWords)[0]);
+    setIsPlayerReady(true);
+    setPlayerTimeLeft(gameSettings.roundTimer);
   }
 
   function confirmEndGame() {
-    dispatch({ type: CONST.ACTION.RESTART })
-    navigation.navigate(CONST.ROUTE.MAIN_MENU)
+    dispatch({ type: CONST.ACTION.RESTART });
+    navigation.navigate(CONST.ROUTE.MAIN_MENU);
   }
 
-  if (isGameOver) return null
+  if (isGameOver) return null;
 
   if (isWelcomeShowing) {
     return (
@@ -152,7 +152,7 @@ function Game({
           onPress={() => setIsWelcomeShowing(false)}
         />
       </View>
-    )
+    );
   }
 
   if (isRoundOver) {
@@ -169,10 +169,10 @@ function Game({
         </Text>
         <Button text30 label="Let's go!" onPress={gotoNextRound} />
       </View>
-    )
+    );
   }
   if (!isPlayerReady) {
-    const currentTeam = teams.find((team) => team.id === currentPlayer.teamID)
+    const currentTeam = teams.find((team) => team.id === currentPlayer.teamID);
     return (
       <View flex center>
         <Text center text40 marginB-30>
@@ -183,7 +183,7 @@ function Game({
           {CONST.ROUND_TYPE_HINT[round]}
         </Text>
       </View>
-    )
+    );
   }
   return (
     <>
@@ -233,7 +233,7 @@ function Game({
         </View>
       </Dialog>
 
-      <View flex center style={{ height: '100%' }}>
+      <View flex center style={{ height: "100%" }}>
         <Text text20 center marginB-30>
           {playerTimeleft}
         </Text>
@@ -249,8 +249,8 @@ function Game({
           onPress={() => handleGuessedWord(wordToGuess)}
         />
         {showRoundTypeHint && (
-          <View style={{ position: 'absolute', bottom: 70 }}>
-            <Text center style={{ alignSelf: 'flex-end' }}>
+          <View style={{ position: "absolute", bottom: 70 }}>
+            <Text center style={{ alignSelf: "flex-end" }}>
               {CONST.ROUND_TYPE_HINT[round]}
             </Text>
           </View>
@@ -265,13 +265,13 @@ function Game({
         <ActionBar
           actions={[
             {
-              label: 'End game',
+              label: "End game",
               red30: true,
               onPress: () => setShowEndGameDialog(true),
             },
             {
               label: `Round: ${CONST.ROUND_TYPE.display[round]}`,
-              labelStyle: { fontWeight: 'bold' },
+              labelStyle: { fontWeight: "bold" },
               onPress: toggleRoundHint,
             },
             { label: `Words left: ${unguessedWords.length}` },
@@ -279,13 +279,13 @@ function Game({
         />
       </View>
     </>
-  )
+  );
 }
 
 const mapStateToProps = (state) => ({
   teams: state.teams || [],
   userInputs: state.userInputs || [],
   gameSettings: state.gameSettings || {},
-})
+});
 
-export default connect(mapStateToProps, (dispatch) => ({ dispatch }))(Game)
+export default connect(mapStateToProps, (dispatch) => ({ dispatch }))(Game);

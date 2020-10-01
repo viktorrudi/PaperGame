@@ -1,30 +1,39 @@
-import React from 'react'
-import { NavigationContainer } from '@react-navigation/native'
-import { createStackNavigator } from '@react-navigation/stack'
+import React from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
 
-import MainMenu from './components/MainMenu'
-import GameSettings from './components/GameSettings'
-import TeamSetup from './components/Setup/TeamSetup'
-import WordSetup from './components/Setup/WordSetup'
-import Game from './components/Game'
-import GameEnd from './components/GameEnd'
+import AuthChecker from "./components/AuthChecker";
+import Login from "./components/Login";
+import MainMenu from "./components/MainMenu";
+import GameSettings from "./components/GameSettings";
+import TeamSetup from "./components/Setup/TeamSetup";
+import WordSetup from "./components/Setup/WordSetup";
+import UserSetup from "./components/Setup/Online/UserSetup";
+import Game from "./components/Game";
+import GameEnd from "./components/GameEnd";
 
-import * as CONST from './constants'
+import * as CONST from "./constants";
 
-const Stack = createStackNavigator()
+const Stack = createStackNavigator();
 
 const headerStyle = {
   headerStyle: {
-    backgroundColor: '#000',
+    backgroundColor: "#000",
   },
-  headerTintColor: '#fff',
+  headerTintColor: "#fff",
   headerTitleStyle: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
-  gestureDirection: 'horizontal',
-}
+  gestureDirection: "horizontal",
+};
 
 const screens = {
+  [CONST.ROUTE.AUTH_CHECKER]: {
+    Component: AuthChecker,
+  },
+  [CONST.ROUTE.LOGIN]: {
+    Component: Login,
+  },
   [CONST.ROUTE.MAIN_MENU]: {
     Component: MainMenu,
   },
@@ -37,25 +46,32 @@ const screens = {
   [CONST.ROUTE.GAME_SETTINGS]: {
     Component: GameSettings,
     options: {
-      title: 'Settings',
+      title: "Settings",
+      ...headerStyle,
+    },
+  },
+  [CONST.ROUTE.SETUP_USER]: {
+    Component: UserSetup,
+    options: {
+      title: "Set yourself up",
       ...headerStyle,
     },
   },
   [CONST.ROUTE.SETUP_TEAM]: {
     Component: TeamSetup,
     options: {
-      title: 'Set up teams',
+      title: "Set up teams",
       ...headerStyle,
     },
   },
   [CONST.ROUTE.SETUP_WORDS]: {
     Component: WordSetup,
     options: {
-      title: 'Add some words',
+      title: "Add some words",
       ...headerStyle,
     },
   },
-}
+};
 function AppNavigator() {
   return (
     <NavigationContainer>
@@ -72,7 +88,7 @@ function AppNavigator() {
         )}
       </Stack.Navigator>
     </NavigationContainer>
-  )
+  );
 }
 
-export default AppNavigator
+export default AppNavigator;
