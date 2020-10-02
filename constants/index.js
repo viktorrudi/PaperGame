@@ -39,15 +39,15 @@ export const ROUTE = {
 
 export const MAIN_MENU_ROUTES = [
   {
-    label: "Start Game",
+    label: "🌍 Online Game",
     route: ROUTE.SETUP_USER,
   },
   {
-    label: "Start Offline Game",
+    label: "🏠 Offline Game",
     route: ROUTE.SETUP_TEAM,
   },
   {
-    label: "Settings",
+    label: "🤔 Settings",
     route: ROUTE.GAME_SETTINGS,
   },
 ];
@@ -57,8 +57,6 @@ export const ACTION = {
   SAVE_TEAMS: "SAVE_TEAMS",
   SAVE_WORDS: "SAVE_WORDS",
   RESTART: "RESTART",
-  LOGIN: "LOGIN",
-  LOGOUT: "LOGOUT",
 };
 
 export const DEFAULT = {

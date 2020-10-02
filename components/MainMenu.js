@@ -15,7 +15,7 @@ function MainMenu({ navigation }) {
   return (
     <View flex center>
       <Text text5 center blue30>
-        {isSignedIn && `Signed in as ${user.email}`}
+        {isSignedIn && `👻 Signed in as ${user.displayName || user.email}`}
       </Text>
       <Text text20 blue30>
         Paper Game
@@ -28,7 +28,7 @@ function MainMenu({ navigation }) {
           key={route}
           text40
           disabled={!isSignedIn && route === CONST.ROUTE.SETUP_USER}
-          marginB-20
+          marginB-10
           label={label}
           style={{ width: "70%" }}
           onPress={() => navigation.navigate(route)}
@@ -37,7 +37,7 @@ function MainMenu({ navigation }) {
       <Button
         text70
         size="small"
-        label={isSignedIn ? "Log Out" : "Log in"}
+        label={isSignedIn ? "🚽 Log Out" : "🥰 Log in"}
         onPress={async () => {
           if (isSignedIn) await API.signOut();
           navigation.navigate(CONST.ROUTE.LOGIN);
