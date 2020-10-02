@@ -1,17 +1,21 @@
 import React, { useState, useEffect } from "react";
-import { connect } from "react-redux";
+import firebase from "firebase";
 
 import { TouchableHighlight, Linking } from "react-native";
 import { View, Text, Button, Image } from "react-native-ui-lib";
 
 import * as CONST from "../constants";
+import * as API from "../utils/api";
 import githubLogo from "../assets/github-logo.png";
 
-function MainMenu({ navigation, user, dispatch }) {
+function MainMenu({ navigation }) {
+  const user = firebase.auth().currentUser;
+  const isSignedIn = user !== null;
+
   return (
     <View flex center>
-      <Text text5 blue30 onPress={() => navigation.navigate(CONST.ROUTE.LOGIN)}>
-        {user ? user.user.email : "Not signed in :("}
+      <Text text5 center blue30>
+        {isSignedIn && `Signed in as ${user.email}`}
       </Text>
       <Text text20 blue30>
         Paper Game
@@ -23,13 +27,23 @@ function MainMenu({ navigation, user, dispatch }) {
         <Button
           key={route}
           text40
-          disabled={!user && route === CONST.ROUTE.SETUP_USER}
+          disabled={!isSignedIn && route === CONST.ROUTE.SETUP_USER}
           marginB-20
           label={label}
           style={{ width: "70%" }}
           onPress={() => navigation.navigate(route)}
         />
       ))}
+      <Button
+        text70
+        size="small"
+        label={isSignedIn ? "Log Out" : "Log in"}
+        onPress={async () => {
+          if (user) await API.signOut();
+          navigation.navigate(CONST.ROUTE.LOGIN);
+        }}
+      />
+
       <TouchableHighlight
         style={{ position: "absolute", bottom: 10, right: 10 }}
         onPress={() => Linking.openURL(CONST.GITHUB_REPO_URL)}
@@ -46,8 +60,4 @@ function MainMenu({ navigation, user, dispatch }) {
   );
 }
 
-const mapStateToProps = (state) => ({
-  user: state.user,
-});
-
-export default connect(mapStateToProps, (dispatch) => ({ dispatch }))(MainMenu);
+export default MainMenu;

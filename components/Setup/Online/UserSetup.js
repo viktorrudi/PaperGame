@@ -1,100 +1,81 @@
-import React, { useCallback, useState, useEffect } from "react";
-import { connect } from "react-redux";
+import React, { useState, useEffect } from "react";
 import firebase from "firebase";
 import { View, Button, TextField, ProgressiveImage } from "react-native-ui-lib";
 import { TouchableHighlight, ScrollView } from "react-native";
 import * as ImagePicker from "expo-image-picker";
+import * as ImageManipulator from "expo-image-manipulator";
 
-import * as CONST from "../../../constants";
-import * as UTIL from "../../../utils";
+import { DB, DB_TYPE, IMAGE } from "../../../constants";
+import * as API from "../../../utils/api";
 
-const imageOptions = {
-  quality: 0.5,
-  allowsEditing: true,
-  aspect: [1, 1],
-  mediaTypes: ImagePicker.MediaTypeOptions.Images,
-};
+function UserSetup({ navigation }) {
+  const user = firebase.auth().currentUser;
+  const [userName, setUserName] = useState(user.displayName || "");
+  const [imageURL, setImageURL] = useState(user.photoURL || "");
 
-function UserSetup({ navigation, user, dispatch }) {
-  const [userName, setUserName] = useState("");
-  const [imageURL, setImageURL] = useState("");
+  async function handleUserImageRequest({ useCamera = false }) {
+    const result = useCamera
+      ? await ImagePicker.launchCameraAsync(IMAGE.OPTIONS)
+      : await ImagePicker.launchImageLibraryAsync(IMAGE.OPTIONS);
 
-  const imageStorage = firebase
-    .storage()
-    .ref("user_images")
-    .child(user.user.uid);
-
-  // Initially set previously stored image
-  useEffect(() => updateImage(imageStorage), []);
-
-  function updateImage(storageRef) {
-    storageRef
-      .getDownloadURL()
-      .then(setImageURL)
-      .catch((e) => setImageURL(""));
+    if (result.cancelled) return;
+    await uploadImage(result.uri);
   }
 
-  async function handleImagePress() {
-    const result = await ImagePicker.launchCameraAsync(imageOptions);
-    if (!result.cancelled) {
-      await uploadImage(result.uri);
-    }
-  }
-
-  async function uploadImage(blobURI) {
+  async function uploadImage(userPhotoURI) {
     try {
-      const response = await fetch(blobURI);
+      const img = await ImageManipulator.manipulateAsync(
+        userPhotoURI,
+        [IMAGE.CONSTRAINTS.SIZE],
+        IMAGE.CONSTRAINTS.FORMAT
+      );
+      const response = await fetch(img.uri);
       const blob = await response.blob();
 
-      const uploadTask = imageStorage.put(blob);
+      const uploadTask = API.db(DB.USER_IMAGES, DB_TYPE.STORAGE, user.key).put(
+        blob
+      );
+
       uploadTask.on(
         "state_changed",
         () => {}, // change
         () => {}, // error
         // complete
-        async () => updateImage(uploadTask.snapshot.ref)
+        async () =>
+          uploadTask.snapshot.ref
+            .getDownloadURL()
+            .then(setImageURL)
+            .catch((e) => setImageURL(""))
       );
     } catch (e) {
-      alert(e.message);
+      alert("uploadImage", e.message);
     }
   }
 
-  /**
-   * Store username and image url.
-   */
-  async function storeUserData() {
-    try {
-      firebase
-        .database()
-        .ref("user_details")
-        // Replace if user already has details in database
-        .set({
-          [user.user.uid]: {
-            email: user.user.email,
-            uid: user.user.uid,
-            userName,
-            imageURL,
-          },
-        });
-    } catch (e) {
-      alert(e.message);
-    }
-  }
-
-  function continueToLobbySearch() {
-    storeUserData();
+  async function continueToLobbySearch() {
+    await API.updateCurrentUser({
+      displayName: userName,
+      photoURL: imageURL,
+    });
     // navigation.navigate()
   }
 
   return (
     <ScrollView style={{ margin: 30 }}>
       <View center marginB-40>
-        <TouchableHighlight onPress={handleImagePress}>
+        <TouchableHighlight
+          onPress={() => handleUserImageRequest({ useCamera: true })}
+        >
           <ProgressiveImage
             style={{ height: 300, width: 300 }}
             source={{ uri: imageURL, cache: "reload" }}
           />
         </TouchableHighlight>
+        <Button
+          text60
+          label="Pick from Library"
+          onPress={handleUserImageRequest}
+        />
       </View>
       <TextField
         text60
@@ -123,10 +104,4 @@ function UserSetup({ navigation, user, dispatch }) {
   );
 }
 
-const mapStateToProps = (state) => ({
-  user: state.user,
-});
-
-export default connect(mapStateToProps, (dispatch) => ({ dispatch }))(
-  UserSetup
-);
+export default UserSetup;

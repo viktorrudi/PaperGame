@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
-import firebase from "firebase";
-import { connect } from "react-redux";
 import { View, Button, TextField, Toast } from "react-native-ui-lib";
 import * as CONST from "../constants";
+import * as API from "../utils/api";
 
-function Login({ navigation, dispatch }) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+function Login({ navigation }) {
+  const [email, setEmail] = useState("vrudi91@gmail.com");
+  const [password, setPassword] = useState("12345678");
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -16,21 +15,16 @@ function Login({ navigation, dispatch }) {
 
   async function handleSignup() {
     try {
-      await firebase.auth().createUserWithEmailAndPassword(email, password);
+      await API.signUp(email, password);
+      navigation.navigate(CONST.ROUTE.MAIN_MENU);
     } catch (e) {
       setError(e.message);
     }
   }
 
-  async function handleSignin() {
+  async function handleLogin() {
     try {
-      const user = await firebase
-        .auth()
-        .signInWithEmailAndPassword(email, password);
-      dispatch({
-        type: CONST.ACTION.LOGIN,
-        payload: user,
-      });
+      await API.signIn(email, password);
       navigation.navigate(CONST.ROUTE.MAIN_MENU);
     } catch (e) {
       setError(e.message);
@@ -65,8 +59,8 @@ function Login({ navigation, dispatch }) {
       <Button
         style={{ width: "100%" }}
         marginB-10
-        label="Sign in"
-        onPress={handleSignin}
+        label="Log in"
+        onPress={handleLogin}
       />
 
       <View
@@ -87,8 +81,4 @@ function Login({ navigation, dispatch }) {
   );
 }
 
-const mapStateToProps = (state) => ({
-  user: state.user,
-});
-
-export default connect(mapStateToProps, (dispatch) => ({ dispatch }))(Login);
+export default Login;
