@@ -39,7 +39,7 @@ function MainMenu({ navigation }) {
         size="small"
         label={isSignedIn ? "Log Out" : "Log in"}
         onPress={async () => {
-          if (user) await API.signOut();
+          if (isSignedIn) await API.signOut();
           navigation.navigate(CONST.ROUTE.LOGIN);
         }}
       />
