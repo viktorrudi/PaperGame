@@ -19,16 +19,11 @@ export function fetchRandomPeople(callback) {
     });
 }
 
-export function db(ref, type, child) {
-  if (!type) return firebase.database().ref(ref);
-  switch (type) {
-    case DB_TYPE.STORAGE:
-      const storage = firebase.storage().ref(ref);
-      return child ? storage.child(child) : storage;
-
-    default:
-      throw Error("Invalid type");
-  }
+export function uploadImage(userID, imageBlob) {
+  if (!userID || !imageBlob)
+    throw new Error("Missing userID or imageBlob in uploadImage() call");
+  const storage = firebase.storage().ref();
+  return storage.child(`${DB.USER_IMAGES}/${userID}`).put(imageBlob);
 }
 
 export async function signIn(email, password) {
@@ -39,25 +34,55 @@ export async function signIn(email, password) {
   }
 }
 
-export async function signOut() {
+export async function signUp(email, password) {
   try {
-    await firebase.auth().signOut();
+    await firebase.auth().createUserWithEmailAndPassword(email, password);
+    const { uid } = firebase.auth().currentUser;
+
+    const userDetails = {
+      username: email.split("@")[0],
+      uid,
+      email,
+      imageURL: "",
+    };
+
+    firebase
+      .database()
+      .ref()
+      .update({ [`/users/${uid}`]: userDetails });
   } catch (e) {
     alert(e.message);
   }
 }
 
-export async function signUp(email, password) {
-  try {
-    await firebase.auth().createUserWithEmailAndPassword(email, password);
-  } catch (e) {
-    alert(e.message);
-  }
+export async function getCurrentUser() {
+  const uid = firebase.auth().currentUser.uid;
+  return new Promise((resolve, reject) => {
+    firebase
+      .database()
+      .ref(`users/${uid}`)
+      .once("value", (snapshot) => {
+        resolve(snapshot.val());
+      });
+  });
 }
 
 export async function updateCurrentUser(props) {
   try {
-    await firebase.auth().currentUser.updateProfile(props);
+    const uid = firebase.auth().currentUser.uid;
+
+    await firebase
+      .database()
+      .ref()
+      .update({ [`/users/${uid}`]: props });
+  } catch (e) {
+    alert(e.message);
+  }
+}
+
+export async function signOut() {
+  try {
+    await firebase.auth().signOut();
   } catch (e) {
     alert(e.message);
   }

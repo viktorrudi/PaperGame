@@ -8,10 +8,25 @@ const init = {
   },
   userInputs: [],
   teams: [],
+  user: {
+    isAuth: false,
+    uid: null,
+    email: null,
+  },
 };
 
 export function reducer(state = init, action) {
   switch (action.type) {
+    case "USER_AUTH":
+      return {
+        ...state,
+        user: {
+          isAuth: action.payload.isAuth,
+          uid: action.payload.uid,
+          email: action.payload.email,
+          imageURL: action.payload.imageURL,
+        },
+      };
     case ACTION.RESTART:
       return { ...state, userInputs: init.userInputs, teams: init.userInputs };
     case ACTION.UPDATE_GAME_SETTINGS:

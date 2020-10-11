@@ -10,6 +10,7 @@ export const DB = {
 
 export const DB_TYPE = {
   STORAGE: "STORAGE",
+  REALTIME: "REALTIME"
 };
 
 export const IMAGE = {

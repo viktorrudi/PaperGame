@@ -1,17 +1,31 @@
 import React, { useState, useEffect } from "react";
+import { connect } from "react-redux";
 import firebase from "firebase";
-import { View, Button, TextField, ProgressiveImage } from "react-native-ui-lib";
+import {
+  View,
+  Button,
+  TextField,
+  ProgressiveImage,
+  Text,
+} from "react-native-ui-lib";
 import { TouchableHighlight, ScrollView } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import * as ImageManipulator from "expo-image-manipulator";
+import { useFocusEffect } from "@react-navigation/native";
 
 import { DB, DB_TYPE, IMAGE } from "../../../constants";
 import * as API from "../../../utils/api";
 
-function UserSetup({ navigation }) {
-  const user = firebase.auth().currentUser;
-  const [userName, setUserName] = useState(user.displayName || "");
-  const [imageURL, setImageURL] = useState(user.photoURL || "");
+function UserSetup({ navigation, userID }) {
+  const [usernameField, setUsernameField] = useState("");
+  const [imageURLField, setImageURLField] = useState("");
+
+  useFocusEffect(() => {
+    API.getCurrentUser().then(({ username, imageURL }) => {
+      setUsernameField(username);
+      setImageURLField(imageURL);
+    });
+  }, []);
 
   async function handleUserImageRequest({ useCamera = false }) {
     const result = useCamera
@@ -31,10 +45,7 @@ function UserSetup({ navigation }) {
       );
       const response = await fetch(img.uri);
       const blob = await response.blob();
-
-      const uploadTask = API.db(DB.USER_IMAGES, DB_TYPE.STORAGE, user.key).put(
-        blob
-      );
+      const uploadTask = API.uploadImage(userID, blob);
 
       uploadTask.on(
         "state_changed",
@@ -48,14 +59,15 @@ function UserSetup({ navigation }) {
             .catch((e) => setImageURL(""))
       );
     } catch (e) {
-      alert("uploadImage", e.message);
+      console.log(e);
+      alert("uploadImage() error: ", e.message || "<Check console>");
     }
   }
 
   async function continueToLobbySearch() {
     await API.updateCurrentUser({
-      displayName: userName,
-      photoURL: imageURL,
+      username: usernameField,
+      imageURL: imageURLField,
     });
     // navigation.navigate()
   }
@@ -67,13 +79,19 @@ function UserSetup({ navigation }) {
           onPress={() => handleUserImageRequest({ useCamera: true })}
         >
           <ProgressiveImage
-            style={{ height: 300, width: 300 }}
-            source={{ uri: imageURL, cache: "reload" }}
+            style={{
+              height: 300,
+              width: 300,
+              backgroundColor: "#68B7F1",
+              borderRadius: 300,
+            }}
+            source={{ uri: imageURLField, cache: "reload" }}
           />
         </TouchableHighlight>
         <Button
           text60
-          label="Pick from Library"
+          style={{ position: "absolute", bottom: 10 }}
+          label="Pick from library"
           onPress={handleUserImageRequest}
         />
       </View>
@@ -82,8 +100,8 @@ function UserSetup({ navigation }) {
         floatOnFocus
         style={{ width: "100%" }}
         placeholder="User Name"
-        value={userName}
-        onChangeText={setUserName}
+        value={usernameField}
+        onChangeText={setUsernameField}
       />
       <View
         style={{
@@ -104,4 +122,8 @@ function UserSetup({ navigation }) {
   );
 }
 
-export default UserSetup;
+const mapStateToProps = (state) => ({
+  userID: state.user.uid,
+});
+
+export default connect(mapStateToProps)(UserSetup);

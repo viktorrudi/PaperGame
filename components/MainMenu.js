@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import firebase from "firebase";
+import { connect } from "react-redux";
+import { useFocusEffect } from "@react-navigation/native";
 
 import { TouchableHighlight, Linking } from "react-native";
 import { View, Text, Button, Image } from "react-native-ui-lib";
@@ -8,14 +10,11 @@ import * as CONST from "../constants";
 import * as API from "../utils/api";
 import githubLogo from "../assets/github-logo.png";
 
-function MainMenu({ navigation }) {
-  const user = firebase.auth().currentUser;
-  const isSignedIn = user !== null;
-
+function MainMenu({ navigation, isUserAuth, userEmail }) {
   return (
     <View flex center>
       <Text text5 center blue30>
-        {isSignedIn && `👻 Signed in as ${user.displayName || user.email}`}
+        {isUserAuth && `👻 Signed in with ${userEmail}`}
       </Text>
       <Text text20 blue30>
         Paper Game
@@ -27,7 +26,7 @@ function MainMenu({ navigation }) {
         <Button
           key={route}
           text40
-          disabled={!isSignedIn && route === CONST.ROUTE.SETUP_USER}
+          disabled={!isUserAuth && route === CONST.ROUTE.SETUP_USER}
           marginB-10
           label={label}
           style={{ width: "70%" }}
@@ -37,9 +36,9 @@ function MainMenu({ navigation }) {
       <Button
         text70
         size="small"
-        label={isSignedIn ? "🚽 Log Out" : "🥰 Log in"}
+        label={isUserAuth ? "🚽 Log Out" : "🥰 Log in"}
         onPress={async () => {
-          if (isSignedIn) await API.signOut();
+          if (isUserAuth) await API.signOut();
           navigation.navigate(CONST.ROUTE.LOGIN);
         }}
       />
@@ -60,4 +59,9 @@ function MainMenu({ navigation }) {
   );
 }
 
-export default MainMenu;
+const mapStateToProps = (state) => ({
+  isUserAuth: state.user.isAuth,
+  userEmail: state.user.email,
+});
+
+export default connect(mapStateToProps)(MainMenu);
