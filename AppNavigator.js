@@ -8,9 +8,14 @@ import MainMenu from "./components/MainMenu";
 import GameSettings from "./components/GameSettings";
 import TeamSetup from "./components/Setup/TeamSetup";
 import WordSetup from "./components/Setup/WordSetup";
-import UserSetup from "./components/Setup/Online/UserSetup";
 import Game from "./components/Game";
 import GameEnd from "./components/GameEnd";
+
+// ONLINE
+import UserSetup from "./components/Setup/Online/UserSetup";
+import CreateLobby from "./components/Setup/Online/CreateLobby";
+import JoinLobby from "./components/Setup/Online/JoinLobby";
+import Lobby from "./components/Setup/Online/Lobby";
 
 import * as CONST from "./constants";
 
@@ -54,6 +59,27 @@ const screens = {
     Component: UserSetup,
     options: {
       title: "Set yourself up",
+      ...headerStyle,
+    },
+  },
+  [CONST.ROUTE.CREATE_LOBBY]: {
+    Component: CreateLobby,
+    options: {
+      title: "Create a Lobby",
+      ...headerStyle,
+    },
+  },
+  [CONST.ROUTE.JOIN_LOBBY]: {
+    Component: JoinLobby,
+    options: {
+      title: "Join a Lobby",
+      ...headerStyle,
+    },
+  },
+  [CONST.ROUTE.LOBBY]: {
+    Component: Lobby,
+    options: {
+      title: "In Lobby",
       ...headerStyle,
     },
   },

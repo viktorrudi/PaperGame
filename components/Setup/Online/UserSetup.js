@@ -13,14 +13,14 @@ import * as ImagePicker from "expo-image-picker";
 import * as ImageManipulator from "expo-image-manipulator";
 import { useFocusEffect } from "@react-navigation/native";
 
-import { DB, DB_TYPE, IMAGE } from "../../../constants";
+import { DB, DB_TYPE, IMAGE, ROUTE } from "../../../constants";
 import * as API from "../../../utils/api";
 
 function UserSetup({ navigation, userID }) {
   const [usernameField, setUsernameField] = useState("");
   const [imageURLField, setImageURLField] = useState("");
 
-  useFocusEffect(() => {
+  useEffect(() => {
     API.getCurrentUser().then(({ username, imageURL }) => {
       setUsernameField(username);
       setImageURLField(imageURL);
@@ -55,8 +55,8 @@ function UserSetup({ navigation, userID }) {
         async () =>
           uploadTask.snapshot.ref
             .getDownloadURL()
-            .then(setImageURL)
-            .catch((e) => setImageURL(""))
+            .then(setImageURLField)
+            .catch((e) => setImageURLField(""))
       );
     } catch (e) {
       console.log(e);
@@ -64,12 +64,11 @@ function UserSetup({ navigation, userID }) {
     }
   }
 
-  async function continueToLobbySearch() {
+  async function saveUser() {
     await API.updateCurrentUser({
       username: usernameField,
       imageURL: imageURLField,
     });
-    // navigation.navigate()
   }
 
   return (
@@ -110,12 +109,22 @@ function UserSetup({ navigation, userID }) {
           justifyContent: "space-between",
         }}
       >
-        <Button text60 label="Find lobbies" onPress={continueToLobbySearch} />
+        <Button
+          text60
+          label="Find lobbies"
+          onPress={async () => {
+            await saveUser();
+            navigation.navigate(ROUTE.JOIN_LOBBY);
+          }}
+        />
         <Button
           text60
           outline
           label="+ Create lobby"
-          onPress={continueToLobbySearch}
+          onPress={async () => {
+            await saveUser();
+            navigation.navigate(ROUTE.CREATE_LOBBY);
+          }}
         />
       </View>
     </ScrollView>

@@ -87,3 +87,35 @@ export async function signOut() {
     alert(e.message);
   }
 }
+
+export async function getUserByUID(uid) {
+  try {
+    const usersRef = firebase.database().ref(`/users/${uid}`);
+    return new Promise((res) => {
+      usersRef.once("value", (snapshot) => {
+        res(snapshot.val());
+      });
+    });
+  } catch (e) {
+    console.error("GET USER BY ID ERROR", e);
+  }
+}
+
+export async function createLobby(lobbyName) {
+  const uid = firebase.auth().currentUser.uid;
+  const lobbiesRef = firebase.database().ref("/lobbies");
+  lobbiesRef.push({
+    creator: uid,
+    displayName: lobbyName,
+    status: "ready",
+  });
+}
+
+export async function getLobbies() {
+  const lobbiesRef = firebase.database().ref("/lobbies");
+  return new Promise((res) => {
+    lobbiesRef.once("value", (snapshot) => {
+      res(snapshot.val());
+    });
+  });
+}
