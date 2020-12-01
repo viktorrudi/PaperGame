@@ -104,10 +104,27 @@ export async function getUserByUID(uid) {
 export async function createLobby(lobbyName) {
   const uid = firebase.auth().currentUser.uid;
   const lobbiesRef = firebase.database().ref("/lobbies");
-  lobbiesRef.push({
-    creator: uid,
-    displayName: lobbyName,
-    status: "ready",
+  const lobbyKey = lobbiesRef.push().key;
+  lobbiesRef.child(lobbyKey).set({
+    meta: {
+      id: lobbyKey,
+      creator: uid,
+      displayName: lobbyName,
+      status: "ready",
+      createdAt: new Date().getTime(),
+    },
+    live: {
+      activePlayer: 0, // uid
+      activeTeam: 0, // teamID
+      round: 0,
+      // { id, word, author }
+      guessedWords: [],
+      // { id, word, author }
+      availableWords: [],
+    },
+    // FOREIGN
+    // teamID: { id, displayName, score, powerPoints, players[uid] }
+    // teams: {},
   });
 }
 
@@ -115,6 +132,15 @@ export async function getLobbies() {
   const lobbiesRef = firebase.database().ref("/lobbies");
   return new Promise((res) => {
     lobbiesRef.once("value", (snapshot) => {
+      res(snapshot.val());
+    });
+  });
+}
+
+export async function getLobbyByID(lobbyID) {
+  const lobbiesRef = firebase.database().ref(`/lobbies/${lobbyID}`);
+  return new Promise((res) => {
+    lobbiesRef.on("value", (snapshot) => {
       res(snapshot.val());
     });
   });

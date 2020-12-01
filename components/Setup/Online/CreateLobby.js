@@ -19,6 +19,7 @@ export default function CreateLobby({ navigation }) {
   async function handleCreateLobby() {
     try {
       await API.createLobby(lobbyName);
+      navigation.navigate(CONST.ROUTE.LOBBY);
     } catch (error) {
       console.error("IN CREATE LOBBY:", error);
     }
@@ -34,7 +35,12 @@ export default function CreateLobby({ navigation }) {
         value={lobbyName}
         onChangeText={setLobbyName}
       />
-      <Button text60 label="Create Lobby" onPress={handleCreateLobby} />
+      <Button
+        text60
+        disabled={lobbyName.length === 0}
+        label="Create Lobby"
+        onPress={handleCreateLobby}
+      />
       {/* <Text center marginT-20 text50 blue30>
         Or join one of these lobbies
       </Text> */}

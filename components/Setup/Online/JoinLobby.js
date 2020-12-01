@@ -22,16 +22,8 @@ export default function JoinLobby({ navigation }) {
   async function fillAvailableLobbies() {
     try {
       const availableLobbies = (await API.getLobbies()) || {};
-      const parsedLobbies = Object.entries(availableLobbies).map(
-        ([lobbyKey, lobby]) => {
-          // const { status, displayName, creator } = lobby;
-          return {
-            lobbyKey,
-            ...lobby,
-          };
-        }
-      );
-      setLobbies(parsedLobbies);
+      console.log(availableLobbies);
+      setLobbies(Object.values(availableLobbies));
     } catch (e) {
       console.error("IN CREATE LOBBY:", error);
     }
@@ -39,9 +31,6 @@ export default function JoinLobby({ navigation }) {
 
   return (
     <View style={{ margin: 20 }}>
-      <Text center marginT-20 text50 blue30>
-        Join by lobby ID
-      </Text>
       <TextField
         text60
         floatOnFocus
@@ -64,7 +53,7 @@ export default function JoinLobby({ navigation }) {
             return (
               <View
                 marginT-20
-                key={lobby.lobbyKey}
+                key={lobby.meta.id}
                 style={{
                   display: "flex",
                   flexDirection: "row",
@@ -72,14 +61,18 @@ export default function JoinLobby({ navigation }) {
                 }}
               >
                 <View>
-                  <Text text50>{lobby.displayName}</Text>
-                  <Text text80>{lobby.status}</Text>
+                  <Text text50>{lobby.meta.displayName}</Text>
+                  <Text text80>{lobby.meta.status}</Text>
                 </View>
                 <Button
                   text60
                   outline={lobbyID.length > 0}
                   label="Join"
-                  onPress={() => navigation.navigate(CONST.ROUTE.LOBBY, lobby)}
+                  onPress={() =>
+                    navigation.navigate(CONST.ROUTE.LOBBY, {
+                      lobbyID: lobby.meta.id,
+                    })
+                  }
                 />
               </View>
             );
