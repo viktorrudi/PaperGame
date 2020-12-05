@@ -10,6 +10,7 @@ import TeamSetup from "./components/Setup/TeamSetup";
 import WordSetup from "./components/Setup/WordSetup";
 import Game from "./components/Game";
 import GameEnd from "./components/GameEnd";
+import QRScanner from "./components/Shared/QRScanner";
 
 // ONLINE
 import UserSetup from "./components/Setup/Online/UserSetup";
@@ -47,6 +48,9 @@ const screens = {
   },
   [CONST.ROUTE.GAME_END]: {
     Component: GameEnd,
+  },
+  [CONST.ROUTE.QR_SCANNER]: {
+    Component: QRScanner,
   },
   [CONST.ROUTE.GAME_SETTINGS]: {
     Component: GameSettings,

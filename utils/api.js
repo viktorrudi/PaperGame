@@ -113,7 +113,7 @@ export async function createLobby(lobbyName) {
       status: "ready",
       createdAt: new Date().getTime(),
     },
-    live: {
+    game: {
       activePlayer: 0, // uid
       activeTeam: 0, // teamID
       round: 0,
@@ -122,9 +122,10 @@ export async function createLobby(lobbyName) {
       // { id, word, author }
       availableWords: [],
     },
-    // FOREIGN
     // teamID: { id, displayName, score, powerPoints, players[uid] }
-    // teams: {},
+    teams: {},
+    // uid: { ...user }
+    players: {},
   });
 }
 

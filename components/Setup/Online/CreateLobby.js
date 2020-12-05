@@ -41,15 +41,6 @@ export default function CreateLobby({ navigation }) {
         label="Create Lobby"
         onPress={handleCreateLobby}
       />
-      {/* <Text center marginT-20 text50 blue30>
-        Or join one of these lobbies
-      </Text> */}
-      {/* <Button
-        label="Find lobby instead"
-        outline
-        onPress={() => navigation.navigate(CONST.ROUTE.JOIN_LOBBY)}
-      /> */}
-      {/* <JoinLobby /> */}
     </View>
   );
 }
