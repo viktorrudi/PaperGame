@@ -2,11 +2,10 @@ import React, { useState, useEffect } from "react";
 import { View, Button, TextField, Toast, Text } from "react-native-ui-lib";
 import { FlatList } from "react-native";
 
-import * as API from "../../../utils/api";
-import * as CONST from "../../../constants";
+import * as API from "../../utils/api";
+import * as CONST from "../../constants";
 
 export default function JoinLobby({ navigation, route }) {
-  const { qrData } = route?.params || {};
   const [lobbyID, setLobbyID] = useState("");
   const [lobbies, setLobbies] = useState([]);
   const [showError, setShowError] = useState(false);
@@ -69,7 +68,7 @@ export default function JoinLobby({ navigation, route }) {
         <View style={{ marginLeft: 10 }}>
           <Button
             text60
-            outline={lobbyID.length === 0}
+            disabled={lobbyID.length === 0}
             label="Join by ID"
             onPress={() => navigation.navigate(CONST.ROUTE.LOBBY, { lobbyID })}
           />

@@ -6,17 +6,22 @@ import AuthChecker from "./components/AuthChecker";
 import Login from "./components/Login";
 import MainMenu from "./components/MainMenu";
 import GameSettings from "./components/GameSettings";
-import TeamSetup from "./components/Setup/TeamSetup";
-import WordSetup from "./components/Setup/WordSetup";
-import Game from "./components/Game";
-import GameEnd from "./components/GameEnd";
+
+// SHARED
 import QRScanner from "./components/Shared/QRScanner";
 
+// OFFLINE
+import Game from "./components/Offline/Game";
+import GameEnd from "./components/Offline/GameEnd";
+import OfflineTeamSetup from "./components/Offline/TeamSetup";
+import WordSetup from "./components/Offline/WordSetup";
+
 // ONLINE
-import UserSetup from "./components/Setup/Online/UserSetup";
-import CreateLobby from "./components/Setup/Online/CreateLobby";
-import JoinLobby from "./components/Setup/Online/JoinLobby";
-import Lobby from "./components/Setup/Online/Lobby";
+import UserSetup from "./components/Online/UserSetup";
+import CreateLobby from "./components/Online/CreateLobby";
+import JoinLobby from "./components/Online/JoinLobby";
+import Lobby from "./components/Online/Lobby";
+import OnlineTeamSetup from "./components/Online/TeamSetup";
 
 import * as CONST from "./constants";
 
@@ -87,8 +92,15 @@ const screens = {
       ...headerStyle,
     },
   },
-  [CONST.ROUTE.SETUP_TEAM]: {
-    Component: TeamSetup,
+  [CONST.ROUTE.OFFLINE_SETUP_TEAM]: {
+    Component: OfflineTeamSetup,
+    options: {
+      title: "Set up teams",
+      ...headerStyle,
+    },
+  },
+  [CONST.ROUTE.ONLINE_SETUP_TEAM]: {
+    Component: OnlineTeamSetup,
     options: {
       title: "Set up teams",
       ...headerStyle,

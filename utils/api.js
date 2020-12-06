@@ -1,6 +1,12 @@
 import { capitalize } from "./index";
 import { DB, DB_TYPE, USER_PROPS } from "../constants";
+import * as UTIL from "./index";
+import * as CONST from "../constants";
 import firebase from "firebase";
+
+export function getCurrentUserUID() {
+  return firebase.auth().currentUser.uid;
+}
 
 export function fetchRandomPeople(callback) {
   const dataSets = ["things.json", "people.json", "animals.json"];
@@ -122,11 +128,17 @@ export async function createLobby(lobbyName) {
       // { id, word, author }
       availableWords: [],
     },
+    rules: {
+      roundTimer: "30",
+      minWords: "3",
+    },
     // teamID: { id, displayName, score, powerPoints, players[uid] }
-    teams: {},
-    // uid: { ...user }
-    players: {},
+    teams: {
+      1337: CONST.DEFAULT_DB_PROPS.TEAM(1337),
+      420: CONST.DEFAULT_DB_PROPS.TEAM(420),
+    },
   });
+  return lobbyKey;
 }
 
 export async function getLobbies() {
@@ -138,6 +150,12 @@ export async function getLobbies() {
   });
 }
 
+export async function deleteLobby(lobbyID) {
+  const lobbiesRef = firebase.database().ref(`/lobbies/${lobbyID}`);
+  await lobbiesRef.remove();
+  return true;
+}
+
 export async function getLobbyByID(lobbyID) {
   const lobbiesRef = firebase.database().ref(`/lobbies/${lobbyID}`);
   return new Promise((res) => {
@@ -145,4 +163,50 @@ export async function getLobbyByID(lobbyID) {
       res(snapshot.val());
     });
   });
+}
+
+export async function createTeam(lobbyID, team) {
+  const lobbiesRef = firebase.database().ref(`/lobbies/${lobbyID}`);
+  await lobbiesRef.child(`teams/${team.id}`).set(team);
+}
+
+export async function deleteTeam(lobbyID, teamID) {
+  const lobbiesRef = firebase.database().ref(`/lobbies/${lobbyID}`);
+  await lobbiesRef.child(`teams/${teamID}`).remove();
+}
+
+export async function createTeams(lobbyID, teams) {
+  const teamsDictionary = UTIL.normalizeIDs(teams);
+  const lobbiesRef = firebase.database().ref(`/lobbies/${lobbyID}`);
+  await lobbiesRef.child("teams").push(teamsDictionary);
+}
+
+export async function joinTeam(lobbyID, teamID) {
+  const uid = getCurrentUserUID();
+  const teamsRef = await firebase.database().ref(`/lobbies/${lobbyID}/teams`);
+
+  teamsRef.once("value", async (snapshot) => {
+    const currentTeams = snapshot.val();
+    const prevTeam = Object.values(currentTeams).reduce((pTeam, team) => {
+      if (pTeam) return pTeam;
+      if (uid in (team.players || {})) {
+        return team;
+      }
+    }, null);
+
+    if (prevTeam) {
+      await leaveTeam(lobbyID, prevTeam.id);
+    }
+  });
+
+  const user = await getUserByUID(uid);
+  await teamsRef.child(`${teamID}/players/${uid}`).set(user);
+}
+
+export async function leaveTeam(lobbyID, teamID) {
+  const uid = getCurrentUserUID();
+  await firebase
+    .database()
+    .ref(`/lobbies/${lobbyID}/teams/${teamID}/players/${uid}`)
+    .remove();
 }

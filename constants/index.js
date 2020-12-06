@@ -1,3 +1,5 @@
+import * as UTIL from "../utils";
+
 export const VERSION_NUMBER = "0.0.2";
 export const GITHUB_REPO_URL = "https://github.com/viktorrudi/PaperGame";
 
@@ -35,7 +37,8 @@ export const ROUTE = {
   CREATE_LOBBY: "CREATE_LOBBY",
   JOIN_LOBBY: "JOIN_LOBBY",
   LOBBY: "LOBBY",
-  SETUP_TEAM: "SETUP_TEAM",
+  OFFLINE_SETUP_TEAM: "OFFLINE_SETUP_TEAM",
+  ONLINE_SETUP_TEAM: "ONLINE_SETUP_TEAM",
   SETUP_WORDS: "SETUP_WORDS",
   GAME_END: "GAME_END",
   GAME: "GAME",
@@ -48,7 +51,7 @@ export const MAIN_MENU_ROUTES = [
   },
   {
     label: "🏠 Offline Game",
-    route: ROUTE.SETUP_TEAM,
+    route: ROUTE.OFFLINE_SETUP_TEAM,
   },
   {
     label: "🤔 Settings",
@@ -61,6 +64,15 @@ export const ACTION = {
   SAVE_TEAMS: "SAVE_TEAMS",
   SAVE_WORDS: "SAVE_WORDS",
   RESTART: "RESTART",
+};
+
+export const GAME_RULES = {
+  TEAM: {
+    MIN: 2,
+  },
+  PLAYER: {
+    MIN: 4,
+  },
 };
 
 export const DEFAULT = {
@@ -86,6 +98,24 @@ export const DEFAULT = {
       ],
     },
   ],
+};
+
+export const RANDOM_TEAM_NAMES = [
+  "Team a",
+  "Team b",
+  "Team c",
+  "Team d",
+  "Team e",
+];
+
+export const DEFAULT_DB_PROPS = {
+  TEAM: (id, name) => ({
+    id: id || Math.floor(Math.random() * 1000000),
+    displayName: name || UTIL.randomTeamName(),
+    score: 0,
+    powerPoints: 10,
+    players: [],
+  }),
 };
 
 export * from "./api";

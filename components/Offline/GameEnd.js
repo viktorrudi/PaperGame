@@ -3,8 +3,8 @@ import { connect } from "react-redux";
 
 import { ScrollView } from "react-native";
 import { View, Text, Button } from "react-native-ui-lib";
-import * as CONST from "../constants";
-import * as UTIL from "../utils";
+import * as CONST from "../../constants";
+import * as UTIL from "../../utils";
 
 function GameEnd({ navigation, route, dispatch, userInputs, teams }) {
   const { scores } = route.params;
@@ -14,7 +14,7 @@ function GameEnd({ navigation, route, dispatch, userInputs, teams }) {
 
   function restartGame() {
     dispatch({ type: CONST.ACTION.RESTART });
-    navigation.navigate(CONST.ROUTE.SETUP_TEAM);
+    navigation.navigate(CONST.ROUTE.OFFLINE_SETUP_TEAM);
   }
 
   function endGame() {

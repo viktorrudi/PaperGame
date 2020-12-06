@@ -10,8 +10,8 @@ import {
   Dialog,
   Hint,
 } from "react-native-ui-lib";
-import * as CONST from "../constants";
-import * as UTIL from "../utils";
+import * as CONST from "../../constants";
+import * as UTIL from "../../utils";
 
 function Game({
   navigation,

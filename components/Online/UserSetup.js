@@ -13,8 +13,8 @@ import * as ImagePicker from "expo-image-picker";
 import * as ImageManipulator from "expo-image-manipulator";
 import { useFocusEffect } from "@react-navigation/native";
 
-import { DB, DB_TYPE, IMAGE, ROUTE } from "../../../constants";
-import * as API from "../../../utils/api";
+import { DB, DB_TYPE, IMAGE, ROUTE } from "../../constants";
+import * as API from "../../utils/api";
 
 function UserSetup({ navigation, userID }) {
   const [usernameField, setUsernameField] = useState("");

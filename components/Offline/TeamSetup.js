@@ -134,19 +134,8 @@ function TeamSetup({ navigation, dispatch }) {
                         updateMember(team.id, member.id, memberName)
                       }
                     />
-                    {/* <Button
-                      marginB-20
-                      size="small"
-                      label="Remove member"
-                      onPress={() => removeMember(team.id, member.id)}
-                    /> */}
                   </View>
                 ))}
-                {/* <Button
-                  size="small"
-                  label="Add Member"
-                  onPress={() => addMember(team.id)}
-                /> */}
               </View>
             </View>
           );

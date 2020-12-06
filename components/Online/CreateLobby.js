@@ -1,25 +1,16 @@
-import React, { useState, useEffect } from "react";
-import {
-  View,
-  Button,
-  TextField,
-  ProgressiveImage,
-  Text,
-} from "react-native-ui-lib";
-import { TouchableHighlight, ScrollView, FlatList } from "react-native";
+import React, { useState } from "react";
+import { View, Button, TextField } from "react-native-ui-lib";
 
-import JoinLobby from "./JoinLobby";
-
-import * as API from "../../../utils/api";
-import * as CONST from "../../../constants";
+import * as API from "../../utils/api";
+import * as CONST from "../../constants";
 
 export default function CreateLobby({ navigation }) {
   const [lobbyName, setLobbyName] = useState("");
 
   async function handleCreateLobby() {
     try {
-      await API.createLobby(lobbyName);
-      navigation.navigate(CONST.ROUTE.LOBBY);
+      const lobbyID = await API.createLobby(lobbyName);
+      navigation.navigate(CONST.ROUTE.LOBBY, { lobbyID });
     } catch (error) {
       console.error("IN CREATE LOBBY:", error);
     }

@@ -1,48 +1,49 @@
 import React, { useState, useEffect } from "react";
-import firebase from "firebase";
+import _ from "lodash";
 import { QRCode } from "react-native-custom-qr-codes-expo";
-import {
-  View,
-  Button,
-  Dialog,
-  TextField,
-  ProgressiveImage,
-  Text,
-} from "react-native-ui-lib";
-import { TouchableHighlight, ScrollView, FlatList, Share } from "react-native";
+import { View, Button, Dialog, Text } from "react-native-ui-lib";
+import { Share } from "react-native";
 
-import * as API from "../../../utils/api";
-import * as CONST from "../../../constants";
-import { useFirebaseListener } from "../../../utils/hooks";
-
-const REQUIRED = {
-  TEAM: {
-    COUNT: 2,
-  },
-  PLAYER: {
-    COUNT: 4,
-  },
-};
+import * as API from "../../utils/api";
+import * as CONST from "../../constants";
+import { useFirebaseListener } from "../../utils/hooks";
 
 export default function Lobby({ navigation, route }) {
   const [isShareVisible, setIsShareVisible] = useState(false);
-  console.log({ route: `/lobbies/${route.params.lobbyID}` });
+
   const { data: lobby, isLoading, error } = useFirebaseListener(
     `/lobbies/${route.params.lobbyID}`,
     "lobby"
   );
 
   useEffect(() => {
-    if (error) navigation.navigate(CONST.ROUTE.JOIN_LOBBY, { error });
+    if (error) {
+      navigation.navigate(CONST.ROUTE.JOIN_LOBBY, { error });
+    }
   }, [error]);
 
   if (isLoading) return <Text>Loading</Text>;
   if (!lobby || error) return <Text>Sorry, something happened</Text>;
 
+  const isOwner = lobby.meta.creator === API.getCurrentUserUID();
   const countOf = {
-    players: Object.keys(lobby.players || {}).length,
-    teams: Object.keys(lobby.teams || {}).length,
+    teams: Object.keys(lobby.teams).length,
+    players: Object.values(lobby.teams).reduce(
+      (acc, team) => acc + _.size(team?.players || {}),
+      0
+    ),
   };
+
+  async function closeLobby() {
+    try {
+      await API.deleteLobby(lobby.meta.id);
+      navigation.navigate(CONST.ROUTE.JOIN_LOBBY, { error: null });
+    } catch (e) {
+      navigation.navigate(CONST.ROUTE.JOIN_LOBBY, {
+        error: { message: "Unable to delete lobby" },
+      });
+    }
+  }
 
   return (
     <>
@@ -64,16 +65,16 @@ export default function Lobby({ navigation, route }) {
           <View>
             <Text text50>Teams</Text>
             <Text text80>
-              {countOf.teams} / {REQUIRED.TEAM.COUNT}
+              {countOf.teams} / {CONST.GAME_RULES.TEAM.MIN}
             </Text>
           </View>
           <Button
             text60
             label="Join a Team"
             onPress={() => {
-              // navigation.navigate(CONST.ROUTE.LOBBY, {
-              //   lobbyID: lobby.meta.id,
-              // });
+              navigation.navigate(CONST.ROUTE.ONLINE_SETUP_TEAM, {
+                lobbyID: lobby.meta.id,
+              });
             }}
           />
         </View>
@@ -89,7 +90,7 @@ export default function Lobby({ navigation, route }) {
           <View>
             <Text text50>Players</Text>
             <Text text80>
-              {countOf.players} / {REQUIRED.PLAYER.COUNT}
+              {countOf.players} / {CONST.GAME_RULES.PLAYER.MIN}
             </Text>
           </View>
         </View>
@@ -105,8 +106,8 @@ export default function Lobby({ navigation, route }) {
           text40
           marginT-20
           disabled={
-            countOf.players < REQUIRED.PLAYER.COUNT ||
-            countOf.teams < REQUIRED.TEAM.COUNT
+            countOf.players < CONST.GAME_RULES.PLAYER.MIN ||
+            countOf.teams < CONST.GAME_RULES.TEAM.MIN
           }
           label="Start game"
           onPress={() => {
@@ -115,6 +116,15 @@ export default function Lobby({ navigation, route }) {
             // });
           }}
         />
+        {isOwner && (
+          <Button
+            text40
+            bg-red30
+            marginT-20
+            label="Close Lobby"
+            onPress={closeLobby}
+          />
+        )}
       </View>
     </>
   );
