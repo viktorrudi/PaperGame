@@ -80,6 +80,6 @@ export function normalizeIDs(arr, idKey) {
 }
 
 export function randomTeamName() {
-  const names = ["Team a", "Team b", "Team c", "Team d", "Team e"];
+  const names = ["Team A", "Team B", "Team C", "Team D", "Team E"];
   return names[Math.floor(Math.random() * names.length)];
 }

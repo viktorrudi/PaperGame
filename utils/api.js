@@ -170,15 +170,20 @@ export async function createTeam(lobbyID, team) {
   await lobbiesRef.child(`teams/${team.id}`).set(team);
 }
 
+export async function createTeams(lobbyID, teams) {
+  const teamsDictionary = UTIL.normalizeIDs(teams);
+  const lobbiesRef = firebase.database().ref(`/lobbies/${lobbyID}`);
+  await lobbiesRef.child("teams").push(teamsDictionary);
+}
+
 export async function deleteTeam(lobbyID, teamID) {
   const lobbiesRef = firebase.database().ref(`/lobbies/${lobbyID}`);
   await lobbiesRef.child(`teams/${teamID}`).remove();
 }
 
-export async function createTeams(lobbyID, teams) {
-  const teamsDictionary = UTIL.normalizeIDs(teams);
+export async function updateTeam(lobbyID, team) {
   const lobbiesRef = firebase.database().ref(`/lobbies/${lobbyID}`);
-  await lobbiesRef.child("teams").push(teamsDictionary);
+  await lobbiesRef.child(`teams/${team.id}`).update(team);
 }
 
 export async function joinTeam(lobbyID, teamID) {

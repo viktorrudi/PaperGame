@@ -25,13 +25,12 @@ export default function Lobby({ navigation, route }) {
   if (isLoading) return <Text>Loading</Text>;
   if (!lobby || error) return <Text>Sorry, something happened</Text>;
 
+  const teams = Object.values(lobby.teams);
+
   const isOwner = lobby.meta.creator === API.getCurrentUserUID();
   const countOf = {
-    teams: Object.keys(lobby.teams).length,
-    players: Object.values(lobby.teams).reduce(
-      (acc, team) => acc + _.size(team?.players || {}),
-      0
-    ),
+    teams: teams.length,
+    players: teams.reduce((acc, team) => acc + _.size(team?.players || {}), 0),
   };
 
   async function closeLobby() {
@@ -91,6 +90,15 @@ export default function Lobby({ navigation, route }) {
             <Text text50>Players</Text>
             <Text text80>
               {countOf.players} / {CONST.GAME_RULES.PLAYER.MIN}
+            </Text>
+            <Text>
+              {teams
+                .map((team) =>
+                  Object.values(team.players || {}).map(
+                    (player) => player?.username
+                  )
+                )
+                .join(" ")}
             </Text>
           </View>
         </View>
