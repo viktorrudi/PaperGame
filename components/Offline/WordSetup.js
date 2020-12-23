@@ -33,7 +33,7 @@ function WordSetup({ navigation, dispatch, teams, gameSettings }) {
   useEffect(initializeMemberQueue, []);
 
   function initializeMemberQueue() {
-    API.fetchRandomPeople(setRandomWords);
+    API.fetchRandomWords(setRandomWords);
     if (teams.length > 0) {
       const allMembers = teams.flatMap((team) => team.members);
       const allExceptFirst = allMembers.slice(1, allMembers.length);

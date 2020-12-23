@@ -22,6 +22,7 @@ import CreateLobby from "./components/Online/CreateLobby";
 import JoinLobby from "./components/Online/JoinLobby";
 import Lobby from "./components/Online/Lobby";
 import OnlineTeamSetup from "./components/Online/TeamSetup";
+import OnlineWordSetup from "./components/Online/WordSetup";
 
 import * as CONST from "./constants";
 
@@ -87,10 +88,6 @@ const screens = {
   },
   [CONST.ROUTE.LOBBY]: {
     Component: Lobby,
-    options: {
-      title: "In Lobby",
-      ...headerStyle,
-    },
   },
   [CONST.ROUTE.OFFLINE_SETUP_TEAM]: {
     Component: OfflineTeamSetup,
@@ -108,6 +105,13 @@ const screens = {
   },
   [CONST.ROUTE.SETUP_WORDS]: {
     Component: WordSetup,
+    options: {
+      title: "Add some words",
+      ...headerStyle,
+    },
+  },
+  [CONST.ROUTE.ONLINE_SETUP_WORDS]: {
+    Component: OnlineWordSetup,
     options: {
       title: "Add some words",
       ...headerStyle,

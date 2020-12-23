@@ -1,5 +1,5 @@
 import { capitalize } from "./index";
-import { DB, DB_TYPE, USER_PROPS } from "../constants";
+import { DB } from "../constants";
 import * as UTIL from "./index";
 import * as CONST from "../constants";
 import firebase from "firebase";
@@ -8,7 +8,7 @@ export function getCurrentUserUID() {
   return firebase.auth().currentUser.uid;
 }
 
-export function fetchRandomPeople(callback) {
+export function fetchRandomWords(callback) {
   const dataSets = ["things.json", "people.json", "animals.json"];
   Promise.all(
     dataSets.map((url) => fetch(`https://www.randomlists.com/data/${url}`))
@@ -16,11 +16,7 @@ export function fetchRandomPeople(callback) {
     .then((res) => Promise.all(res.map((r) => r.json())))
     .then((data) => {
       callback(
-        data.flatMap(({ RandL }) =>
-          RandL.items.map((word) => {
-            return capitalize(word);
-          })
-        )
+        data.flatMap(({ RandL }) => RandL.items.map((word) => capitalize(word)))
       );
     });
 }
@@ -62,7 +58,7 @@ export async function signUp(email, password) {
 }
 
 export async function getCurrentUser() {
-  const uid = firebase.auth().currentUser.uid;
+  const uid = getCurrentUserUID();
   return new Promise((resolve, reject) => {
     firebase
       .database()
@@ -75,7 +71,7 @@ export async function getCurrentUser() {
 
 export async function updateCurrentUser(props) {
   try {
-    const uid = firebase.auth().currentUser.uid;
+    const uid = getCurrentUserUID();
 
     await firebase
       .database()
@@ -108,7 +104,7 @@ export async function getUserByUID(uid) {
 }
 
 export async function createLobby(lobbyName) {
-  const uid = firebase.auth().currentUser.uid;
+  const uid = getCurrentUserUID();
   const lobbiesRef = firebase.database().ref("/lobbies");
   const lobbyKey = lobbiesRef.push().key;
   lobbiesRef.child(lobbyKey).set({
@@ -123,10 +119,10 @@ export async function createLobby(lobbyName) {
       activePlayer: 0, // uid
       activeTeam: 0, // teamID
       round: 0,
-      // { id, word, author }
-      guessedWords: [],
-      // { id, word, author }
-      availableWords: [],
+      // wordID: { id, word, author }
+      guessedWords: {},
+      // wordID: { id, word, author }
+      availableWords: {},
     },
     rules: {
       roundTimer: "30",
@@ -141,6 +137,10 @@ export async function createLobby(lobbyName) {
   return lobbyKey;
 }
 
+function getLobbyRefByID(lobbyID) {
+  return firebase.database().ref(`/lobbies/${lobbyID}`);
+}
+
 export async function getLobbies() {
   const lobbiesRef = firebase.database().ref("/lobbies");
   return new Promise((res) => {
@@ -151,39 +151,33 @@ export async function getLobbies() {
 }
 
 export async function deleteLobby(lobbyID) {
-  const lobbiesRef = firebase.database().ref(`/lobbies/${lobbyID}`);
-  await lobbiesRef.remove();
+  await getLobbyRefByID(lobbyID).remove();
   return true;
 }
 
 export async function getLobbyByID(lobbyID) {
-  const lobbiesRef = firebase.database().ref(`/lobbies/${lobbyID}`);
   return new Promise((res) => {
-    lobbiesRef.on("value", (snapshot) => {
+    getLobbyRefByID(lobbyID).on("value", (snapshot) => {
       res(snapshot.val());
     });
   });
 }
 
 export async function createTeam(lobbyID, team) {
-  const lobbiesRef = firebase.database().ref(`/lobbies/${lobbyID}`);
-  await lobbiesRef.child(`teams/${team.id}`).set(team);
+  await getLobbyRefByID(lobbyID).child(`teams/${team.id}`).set(team);
 }
 
 export async function createTeams(lobbyID, teams) {
   const teamsDictionary = UTIL.normalizeIDs(teams);
-  const lobbiesRef = firebase.database().ref(`/lobbies/${lobbyID}`);
-  await lobbiesRef.child("teams").push(teamsDictionary);
+  await getLobbyRefByID(lobbyID).child("teams").push(teamsDictionary);
 }
 
 export async function deleteTeam(lobbyID, teamID) {
-  const lobbiesRef = firebase.database().ref(`/lobbies/${lobbyID}`);
-  await lobbiesRef.child(`teams/${teamID}`).remove();
+  await getLobbyRefByID(lobbyID).child(`teams/${teamID}`).remove();
 }
 
 export async function updateTeam(lobbyID, team) {
-  const lobbiesRef = firebase.database().ref(`/lobbies/${lobbyID}`);
-  await lobbiesRef.child(`teams/${team.id}`).update(team);
+  await getLobbyRefByID(lobbyID).child(`teams/${team.id}`).update(team);
 }
 
 export async function joinTeam(lobbyID, teamID) {
@@ -208,10 +202,52 @@ export async function joinTeam(lobbyID, teamID) {
   await teamsRef.child(`${teamID}/players/${uid}`).set(user);
 }
 
+/**
+ *
+ * @param {String} lobbyID
+ * @param {Object} words wordID: { ...wordDetails }
+ */
+export async function saveWords(lobbyID, words) {
+  const uid = getCurrentUserUID();
+  const snapshot = await getLobbyRefByID(lobbyID)
+    .child(`game/availableWords`)
+    .once("value");
+
+  const availableWords = Object.values(snapshot.val() || {});
+  const hasSavedWords = availableWords.some((w) => w?.author === uid);
+
+  const updatedWords = hasSavedWords
+    ? availableWords.reduce((allWords, wordDetails) => {
+        const isAuthor = uid === wordDetails.author;
+        return {
+          ...allWords,
+          [wordDetails.id]: {
+            ...wordDetails,
+            word: isAuthor ? words[wordDetails.id].word : wordDetails.word,
+          },
+        };
+      }, {})
+    : words;
+
+  await getLobbyRefByID(lobbyID)
+    .child(`game/availableWords`)
+    .update(updatedWords);
+}
+
 export async function leaveTeam(lobbyID, teamID) {
   const uid = getCurrentUserUID();
   await firebase
     .database()
     .ref(`/lobbies/${lobbyID}/teams/${teamID}/players/${uid}`)
     .remove();
+}
+
+/**
+ *
+ * @param {String} lobbyID
+ * @param {Array} wordIDs
+ */
+export async function clearWordsFromLobby(lobbyID, wordIDs) {
+  const cleared = wordIDs.reduce((ids, id) => ({ ...ids, [id]: null }), {});
+  await getLobbyRefByID(lobbyID).child("game/availableWords").update(cleared);
 }

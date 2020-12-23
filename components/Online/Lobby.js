@@ -2,19 +2,29 @@ import React, { useState, useEffect } from "react";
 import _ from "lodash";
 import { QRCode } from "react-native-custom-qr-codes-expo";
 import { View, Button, Dialog, Text } from "react-native-ui-lib";
-import { Share } from "react-native";
+import { Share, ScrollView } from "react-native";
+
+import RowAction from "../Shared/RowAction";
 
 import * as API from "../../utils/api";
 import * as CONST from "../../constants";
 import { useFirebaseListener } from "../../utils/hooks";
+import { useBackHandler } from "@react-native-community/hooks";
 
 export default function Lobby({ navigation, route }) {
+  const uid = API.getCurrentUserUID();
+  const { lobbyID } = route.params;
   const [isShareVisible, setIsShareVisible] = useState(false);
-
-  const { data: lobby, isLoading, error } = useFirebaseListener(
-    `/lobbies/${route.params.lobbyID}`,
+  const { data: lobby = {}, isLoading, error } = useFirebaseListener(
+    `/lobbies/${lobbyID}`,
     "lobby"
   );
+
+  // Leave lobby if exiting lobby by using native back functionality
+  useBackHandler(async () => {
+    await handleLeaveLobby();
+    return true;
+  });
 
   useEffect(() => {
     if (error) {
@@ -25,13 +35,22 @@ export default function Lobby({ navigation, route }) {
   if (isLoading) return <Text>Loading</Text>;
   if (!lobby || error) return <Text>Sorry, something happened</Text>;
 
-  const teams = Object.values(lobby.teams);
-
-  const isOwner = lobby.meta.creator === API.getCurrentUserUID();
+  const teams = Object.values(lobby.teams || {});
+  const words = Object.values(lobby.game.availableWords || {});
   const countOf = {
+    words: words.length,
     teams: teams.length,
     players: teams.reduce((acc, team) => acc + _.size(team?.players || {}), 0),
   };
+
+  const minWordsToStart = countOf.players * lobby.rules.minWords;
+  const isOwner = lobby.meta.creator === uid;
+  const usersWords = words.filter((w) => w?.author === uid);
+  const inTeam = Object.values(teams).find(
+    ({ players = {} }) => uid in players
+  );
+
+  console.log(countOf.words, minWordsToStart);
 
   async function closeLobby() {
     try {
@@ -44,64 +63,62 @@ export default function Lobby({ navigation, route }) {
     }
   }
 
+  async function handleLeaveLobby() {
+    if (inTeam) await API.leaveTeam(lobbyID, inTeam.id);
+    if (usersWords.length > 0) {
+      await API.clearWordsFromLobby(
+        lobbyID,
+        usersWords.map((w) => w.id)
+      );
+    }
+    navigation.navigate(CONST.ROUTE.JOIN_LOBBY);
+  }
+
   return (
-    <>
+    <ScrollView>
       <ShareLobbyDialog
         lobbyID={lobby.meta.id}
         visible={isShareVisible}
         onDismiss={() => setIsShareVisible(false)}
       />
-      <View style={{ margin: 20 }}>
-        <Text text60>{lobby.meta.displayName}</Text>
-        <View
-          marginT-20
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "space-between",
+      <View marginT-50 style={{ margin: 20 }}>
+        <RowAction
+          title={lobby.meta.displayName}
+          button={{
+            red: true,
+            label: "Leave Lobby",
+            action: handleLeaveLobby,
           }}
-        >
-          <View>
-            <Text text50>Teams</Text>
-            <Text text80>
-              {countOf.teams} / {CONST.GAME_RULES.TEAM.MIN}
-            </Text>
-          </View>
-          <Button
-            text60
-            label="Join a Team"
-            onPress={() => {
-              navigation.navigate(CONST.ROUTE.ONLINE_SETUP_TEAM, {
-                lobbyID: lobby.meta.id,
-              });
+        />
+        <RowAction
+          title="Teams"
+          subtitle={`${countOf.players} player${
+            countOf.players.length > 1 ? "s" : ""
+          } joined`}
+          button={{
+            label: "Join a Team",
+            action: () => {
+              navigation.navigate(CONST.ROUTE.ONLINE_SETUP_TEAM, { lobbyID });
+            },
+          }}
+        />
+
+        {inTeam && (
+          <RowAction
+            title="Words"
+            subtitle={`${countOf.words} added. ${
+              minWordsToStart - countOf.words
+            } more needed`}
+            button={{
+              label: `${usersWords.length > 0 ? "Edit" : "Add"} your words`,
+              action: () => {
+                navigation.navigate(CONST.ROUTE.ONLINE_SETUP_WORDS, {
+                  lobbyID,
+                });
+              },
             }}
           />
-        </View>
-
-        <View
-          marginT-20
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "space-between",
-          }}
-        >
-          <View>
-            <Text text50>Players</Text>
-            <Text text80>
-              {countOf.players} / {CONST.GAME_RULES.PLAYER.MIN}
-            </Text>
-            <Text>
-              {teams
-                .map((team) =>
-                  Object.values(team.players || {}).map(
-                    (player) => player?.username
-                  )
-                )
-                .join(" ")}
-            </Text>
-          </View>
-        </View>
+        )}
 
         <Button
           marginT-50
@@ -114,8 +131,9 @@ export default function Lobby({ navigation, route }) {
           text40
           marginT-20
           disabled={
+            countOf.words < minWordsToStart ||
             countOf.players < CONST.GAME_RULES.PLAYER.MIN ||
-            countOf.teams < CONST.GAME_RULES.TEAM.MIN
+            countOf.teams < CONST.GAME_RULES.TEAM.MIN // unlikely to be false
           }
           label="Start game"
           onPress={() => {
@@ -134,11 +152,22 @@ export default function Lobby({ navigation, route }) {
           />
         )}
       </View>
-    </>
+    </ScrollView>
   );
 }
 
 function ShareLobbyDialog({ visible, onDismiss, lobbyID }) {
+  async function share() {
+    try {
+      const shared = await Share.share({ message: lobbyID });
+      if (shared.action === Share.sharedAction) {
+        onDismiss();
+      }
+    } catch (e) {
+      console.error("Error sharing", e);
+    }
+  }
+
   return (
     <Dialog visible={visible} onDismiss={onDismiss}>
       <View
@@ -154,19 +183,7 @@ function ShareLobbyDialog({ visible, onDismiss, lobbyID }) {
           Scan or Share the lobby ID
         </Text>
         <QRCode content={lobbyID} />
-        <Button
-          label="Share LobbyID"
-          onPress={async () => {
-            try {
-              const shared = await Share.share({ message: lobbyID });
-              if (shared.action === Share.sharedAction) {
-                onDismiss();
-              }
-            } catch (e) {
-              console.error("Error sharing", e);
-            }
-          }}
-        />
+        <Button label="Share LobbyID" onPress={share} />
       </View>
     </Dialog>
   );

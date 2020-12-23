@@ -1,4 +1,5 @@
 import * as UTIL from "../utils";
+import * as API from "../utils/api";
 
 export const VERSION_NUMBER = "0.0.2";
 export const GITHUB_REPO_URL = "https://github.com/viktorrudi/PaperGame";
@@ -39,6 +40,7 @@ export const ROUTE = {
   LOBBY: "LOBBY",
   OFFLINE_SETUP_TEAM: "OFFLINE_SETUP_TEAM",
   ONLINE_SETUP_TEAM: "ONLINE_SETUP_TEAM",
+  ONLINE_SETUP_WORDS: "ONLINE_SETUP_WORDS",
   SETUP_WORDS: "SETUP_WORDS",
   GAME_END: "GAME_END",
   GAME: "GAME",
@@ -115,6 +117,11 @@ export const DEFAULT_DB_PROPS = {
     score: 0,
     powerPoints: 10,
     players: [],
+  }),
+  WORD: (id, author) => ({
+    id: id || UTIL.getRandomID(),
+    author: author || API.getCurrentUserUID(),
+    word: "",
   }),
 };
 

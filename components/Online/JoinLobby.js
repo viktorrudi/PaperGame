@@ -75,6 +75,7 @@ export default function JoinLobby({ navigation, route }) {
         </View>
       </View>
 
+      {/* TODO: Remove before publishing to store */}
       <View marginT-40>
         <Text>Available Lobbies</Text>
         <FlatList
