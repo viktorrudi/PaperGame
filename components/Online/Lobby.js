@@ -15,10 +15,16 @@ export default function Lobby({ navigation, route }) {
   const uid = API.getCurrentUserUID();
   const { lobbyID } = route.params;
   const [isShareVisible, setIsShareVisible] = useState(false);
-  const { data: lobby = {}, isLoading, error } = useFirebaseListener(
-    `/lobbies/${lobbyID}`,
-    "lobby"
-  );
+  const {
+    data: lobby = {
+      game: {},
+      meta: {},
+      rules: {},
+      teams: {},
+    },
+    isLoading,
+    error,
+  } = useFirebaseListener(`/lobbies/${lobbyID}`, "lobby");
 
   // Leave lobby if exiting lobby by using native back functionality
   useBackHandler(async () => {
@@ -33,7 +39,8 @@ export default function Lobby({ navigation, route }) {
   }, [error]);
 
   if (isLoading) return <Text>Loading</Text>;
-  if (!lobby || error) return <Text>Sorry, something happened</Text>;
+  if (!lobby || !lobby.game || error)
+    return <Text>Sorry, something happened</Text>;
 
   const teams = Object.values(lobby.teams || {});
   const words = Object.values(lobby.game.availableWords || {});

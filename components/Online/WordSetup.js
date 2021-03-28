@@ -29,17 +29,19 @@ export default function WordSetup({ navigation, route }) {
   function getUsersWords() {
     if (!availableWords.length > 0) return [];
     const uid = API.getCurrentUserUID();
-    return availableWords
+    const wordz = availableWords
       .filter((w) => w.author === uid)
       .slice(0, lobby.rules.minWords);
+    return wordz;
   }
 
   function getNewEmptyWords() {
     if (!lobby.rules?.minWords) return [];
-    return Array.from(
-      { length: lobby.rules.minWords },
-      CONST.DEFAULT_DB_PROPS.WORD
-    );
+    let newWords = [];
+    for (let i = 0; i < lobby.rules.minWords; i++) {
+      newWords.push(CONST.DEFAULT_DB_PROPS.WORD());
+    }
+    return newWords;
   }
 
   function updateWords(wordID, word) {

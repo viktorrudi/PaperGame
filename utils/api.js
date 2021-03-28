@@ -215,7 +215,6 @@ export async function saveWords(lobbyID, words) {
 
   const availableWords = Object.values(snapshot.val() || {});
   const hasSavedWords = availableWords.some((w) => w?.author === uid);
-
   const updatedWords = hasSavedWords
     ? availableWords.reduce((allWords, wordDetails) => {
         const isAuthor = uid === wordDetails.author;
