@@ -10,13 +10,9 @@ export function useFirebaseListener(refTarget, refName) {
   const [data, setData] = useState({});
 
   function onSnapshot(snapshot) {
-    if (snapshot.val()) {
-      setData(snapshot.val());
-      setError(null);
-    } else {
-      setData({});
-      setError({ message: `Could not find ${refName}` });
-    }
+    const val = snapshot.val();
+    setData(val || {});
+    setError(val ? null : { message: `Could not find ${refName}` });
     setIsLoading(false);
   }
 
@@ -45,9 +41,7 @@ export function useQRScanner() {
     })();
   }, [shouldAskForPermission, hasPermission]);
 
-  function onScan({ type, data }) {
-    setQrData(data);
-  }
+  const onScan = ({ data }) => setQrData(data);
   return {
     hasPermission,
     askForPermission: () => setShouldAskForPermission(true),

@@ -50,8 +50,6 @@ export default function Lobby({ navigation, route }) {
     ({ players = {} }) => uid in players
   );
 
-  console.log(countOf.words, minWordsToStart);
-
   async function closeLobby() {
     try {
       await API.deleteLobby(lobby.meta.id);

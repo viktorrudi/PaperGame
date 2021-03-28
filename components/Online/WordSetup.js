@@ -18,13 +18,13 @@ export default function WordSetup({ navigation, route }) {
   );
 
   const needsMoreWords = words.some((w) => w?.word === "");
-  const availableWords = Object.values(lobby?.game?.availableWords || {});
+  const availableWords = Object.values(lobby.game?.availableWords || {});
 
   useEffect(() => API.fetchRandomWords(setRandomWords), []);
   useEffect(() => {
     const usersWords = getUsersWords();
     setWords(usersWords.length > 0 ? usersWords : getNewEmptyWords());
-  }, [lobby?.rules?.minWords]);
+  }, [lobby.rules?.minWords]);
 
   function getUsersWords() {
     if (!availableWords.length > 0) return [];
@@ -35,9 +35,10 @@ export default function WordSetup({ navigation, route }) {
   }
 
   function getNewEmptyWords() {
-    if (!lobby?.rules?.minWords) return [];
-    return Array.from({ length: lobby.rules.minWords }, () =>
-      CONST.DEFAULT_DB_PROPS.WORD()
+    if (!lobby.rules?.minWords) return [];
+    return Array.from(
+      { length: lobby.rules.minWords },
+      CONST.DEFAULT_DB_PROPS.WORD
     );
   }
 
