@@ -8,6 +8,7 @@ import RowAction from "../Shared/RowAction";
 
 import * as API from "../../utils/api";
 import * as CONST from "../../constants";
+import * as CONST_API from "../../constants/api";
 import { useFirebaseListener } from "../../utils/hooks";
 import { useBackHandler } from "@react-native-community/hooks";
 
@@ -38,9 +39,12 @@ export default function Lobby({ navigation, route }) {
     }
   }, [error]);
 
+  useEffect(redirectIfInGame, [lobby.meta?.status, lobby.meta?.id]);
+
   if (isLoading) return <Text>Loading</Text>;
-  if (!lobby || !lobby.game || error)
+  if (!lobby || !lobby.game || error) {
     return <Text>Sorry, something happened</Text>;
+  }
 
   const teams = Object.values(lobby.teams || {});
   const words = Object.values(lobby.game.availableWords || {});
@@ -77,6 +81,24 @@ export default function Lobby({ navigation, route }) {
       );
     }
     navigation.navigate(CONST.ROUTE.JOIN_LOBBY);
+  }
+
+  async function handleStartGame() {
+    await API.initializeGame(lobby);
+    goToGame();
+  }
+
+  function redirectIfInGame() {
+    const isLobbyInGame = CONST_API.LOBBY_STATUS_GROUP.IN_GAME.includes(
+      lobby.meta?.status
+    );
+    if (isLobbyInGame) goToGame();
+  }
+
+  function goToGame() {
+    navigation.navigate(CONST.ROUTE.ONLINE_GAME, {
+      lobbyID: lobby.meta.id,
+    });
   }
 
   return (
@@ -132,29 +154,27 @@ export default function Lobby({ navigation, route }) {
           label="Invite Players"
           onPress={() => setIsShareVisible(true)}
         />
-        <Button
-          text40
-          marginT-20
-          disabled={
-            countOf.words < minWordsToStart ||
-            countOf.players < CONST.GAME_RULES.PLAYER.MIN ||
-            countOf.teams < CONST.GAME_RULES.TEAM.MIN // unlikely to be false
-          }
-          label="Start game"
-          onPress={() => {
-            // navigation.navigate(CONST.ROUTE.ONLINE_GAME, {
-            //   lobbyID: lobby.meta.id,
-            // });
-          }}
-        />
         {isOwner && (
-          <Button
-            text40
-            bg-red30
-            marginT-20
-            label="Close Lobby"
-            onPress={closeLobby}
-          />
+          <>
+            <Button
+              text40
+              marginT-20
+              disabled={
+                countOf.words < minWordsToStart ||
+                countOf.players < CONST.GAME_RULES.PLAYER.MIN ||
+                countOf.teams < CONST.GAME_RULES.TEAM.MIN // unlikely to be false
+              }
+              label="Start game"
+              onPress={handleStartGame}
+            />
+            <Button
+              text40
+              bg-red30
+              marginT-20
+              label="Close Lobby"
+              onPress={closeLobby}
+            />
+          </>
         )}
       </View>
     </ScrollView>

@@ -1,25 +1,44 @@
 import * as UTIL from "../utils";
 import * as API from "../utils/api";
+import * as CONST_API from "./api";
 
 export const VERSION_NUMBER = "0.0.2";
 export const GITHUB_REPO_URL = "https://github.com/viktorrudi/PaperGame";
 
 export const ROUND_TYPE = {
+  // Offline
   EXPLAIN: "EXPLAIN",
   ONE_WORD: "ONE_WORD",
   MIME: "MIME",
+  // ONLINE
+  [CONST_API.LOBBY_STATUS.PAUSE_ROUND_ONE]: "EXPLAIN",
+  [CONST_API.LOBBY_STATUS.PAUSE_ROUND_TWO]: "ONE_WORD",
+  [CONST_API.LOBBY_STATUS.PAUSE_ROUND_THREE]: "MIME",
   display: {
+    // Offline
     EXPLAIN: "Explanation",
     ONE_WORD: "One Word",
     MIME: "Miming",
+    // ONLINE
+    [CONST_API.LOBBY_STATUS.PAUSE_ROUND_ONE]: "Explanation",
+    [CONST_API.LOBBY_STATUS.PAUSE_ROUND_TWO]: "One Word",
+    [CONST_API.LOBBY_STATUS.PAUSE_ROUND_THREE]: "Miming",
   },
 };
 
 export const ROUND_TYPE_HINT = {
+  // OFFLINE
   EXPLAIN:
     "You can fully explain the word, except for using the word or something which rhymes with it.",
   ONE_WORD: "You can only use one word to explain your given word.",
   MIME: "No talking! You must use your body to explain the given word.",
+  // ONLINE
+  [CONST_API.LOBBY_STATUS.PAUSE_ROUND_ONE]:
+    "You can fully explain the word, except for using the word or something which rhymes with it.",
+  [CONST_API.LOBBY_STATUS.PAUSE_ROUND_TWO]:
+    "You can only use one word to explain your given word.",
+  [CONST_API.LOBBY_STATUS.PAUSE_ROUND_THREE]:
+    "No talking! You must use your body to explain the given word.",
 };
 
 export const ROUNDS = [
@@ -44,6 +63,7 @@ export const ROUTE = {
   SETUP_WORDS: "SETUP_WORDS",
   GAME_END: "GAME_END",
   GAME: "GAME",
+  ONLINE_GAME: "ONLINE_GAME",
 };
 
 export const MAIN_MENU_ROUTES = [

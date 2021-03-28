@@ -4,6 +4,7 @@ import { FlatList } from "react-native";
 
 import * as API from "../../utils/api";
 import * as CONST from "../../constants";
+import * as CONST_API from "../../constants/api";
 
 export default function JoinLobby({ navigation, route }) {
   const [lobbyID, setLobbyID] = useState("");
@@ -93,7 +94,9 @@ export default function JoinLobby({ navigation, route }) {
               >
                 <View>
                   <Text text50>{lobby.meta.displayName}</Text>
-                  <Text text80>{lobby.meta.status}</Text>
+                  <Text text80>
+                    {CONST_API.LOBBY_STATUS_DISPLAY[lobby.meta.status] || ""}
+                  </Text>
                 </View>
                 <Button
                   text60

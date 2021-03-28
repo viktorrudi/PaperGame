@@ -17,6 +17,7 @@ import OfflineTeamSetup from "./components/Offline/TeamSetup";
 import WordSetup from "./components/Offline/WordSetup";
 
 // ONLINE
+import OnlineGame from "./components/Online/Game";
 import UserSetup from "./components/Online/UserSetup";
 import CreateLobby from "./components/Online/CreateLobby";
 import JoinLobby from "./components/Online/JoinLobby";
@@ -88,6 +89,9 @@ const screens = {
   },
   [CONST.ROUTE.LOBBY]: {
     Component: Lobby,
+  },
+  [CONST.ROUTE.ONLINE_GAME]: {
+    Component: OnlineGame,
   },
   [CONST.ROUTE.OFFLINE_SETUP_TEAM]: {
     Component: OfflineTeamSetup,

@@ -2,6 +2,7 @@ import { capitalize } from "./index";
 import { DB } from "../constants";
 import * as UTIL from "./index";
 import * as CONST from "../constants";
+import * as CONST_API from "../constants/api";
 import firebase from "firebase";
 
 export function getCurrentUserUID() {
@@ -112,17 +113,18 @@ export async function createLobby(lobbyName) {
       id: lobbyKey,
       creator: uid,
       displayName: lobbyName,
-      status: "ready",
+      status: CONST_API.LOBBY_STATUS.READY,
       createdAt: new Date().getTime(),
     },
     game: {
       activePlayer: 0, // uid
-      activeTeam: 0, // teamID
       round: 0,
       // wordID: { id, word, author }
-      guessedWords: {},
+      activeWordIDs: 0,
       // wordID: { id, word, author }
-      availableWords: {},
+      guessedWords: 0,
+      // wordID: { id, word, author }
+      availableWords: 0,
     },
     rules: {
       roundTimer: "30",
@@ -249,4 +251,17 @@ export async function leaveTeam(lobbyID, teamID) {
 export async function clearWordsFromLobby(lobbyID, wordIDs) {
   const cleared = wordIDs.reduce((ids, id) => ({ ...ids, [id]: null }), {});
   await getLobbyRefByID(lobbyID).child("game/availableWords").update(cleared);
+}
+
+// TODO
+export async function initializeGame(lobby) {
+  const playerQueue = UTIL.getOnlinePlayerQueue(lobby.teams);
+  const metaData = {
+    status: CONST_API.LOBBY_STATUS.PAUSE_ROUND_ONE,
+  };
+  const gameData = {
+    activePlayer: playerQueue[0],
+  };
+
+  await getLobbyRefByID(lobbyID).child("meta").update(metaData);
 }

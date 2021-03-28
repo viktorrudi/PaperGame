@@ -35,6 +35,22 @@ export function getWinner(teams) {
   return winner;
 }
 
+export function getOnlinePlayerQueue(teams) {
+  const totalPlayerCount = Object.values(teams).reduce((players, team) => {
+    return players + Object.keys(team.players).length;
+  }, 0);
+
+  const playerIDs = [];
+  for (let i = 0; i < totalPlayerCount; i++) {
+    Object.values(teams).forEach((team) => {
+      const teamPlayerID = Object.keys(team.players)[i];
+      if (!teamPlayerID) return;
+      playerIDs.push(teamPlayerID);
+    }, []);
+  }
+  return playerIDs;
+}
+
 export function generateQueues(players) {
   const uniq = [...new Set(players.map(({ teamID }) => teamID))];
   let helper = {};
