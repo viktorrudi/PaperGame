@@ -117,11 +117,13 @@ export async function createLobby(lobbyName) {
       createdAt: new Date().getTime(),
     },
     game: {
-      activePlayer: 0, // uid
-      round: 0,
-      // wordID: { id, word, author }
+      // [ uuids ]
+      playerQueue: 0,
+      // playerQueue index
+      activePlayer: 0,
+      // [wordIDs]
       activeWordIDs: 0,
-      // wordID: { id, word, author }
+      // [wordIDs]
       guessedWords: 0,
       // wordID: { id, word, author }
       availableWords: 0,
@@ -256,12 +258,37 @@ export async function clearWordsFromLobby(lobbyID, wordIDs) {
 // TODO
 export async function initializeGame(lobby) {
   const playerQueue = UTIL.getOnlinePlayerQueue(lobby.teams);
+  const [firstWord] = Object.keys(lobby.game.availableWords);
+
   const metaData = {
     status: CONST_API.LOBBY_STATUS.PAUSE_ROUND_ONE,
   };
   const gameData = {
-    activePlayer: playerQueue[0],
+    activePlayer: 0,
+    activeWordIDs: [firstWord],
+    playerQueue,
   };
+  await getLobbyRefByID(lobby.meta.id).update({
+    meta: { ...lobby.meta, ...metaData },
+    game: { ...lobby.game, ...gameData },
+  });
+}
 
-  await getLobbyRefByID(lobbyID).child("meta").update(metaData);
+// Update "meta" props
+export async function updateLobbyStatus(lobby, nextStatus) {
+  await getLobbyRefByID(lobby.meta.id).child("meta").update({
+    status: nextStatus,
+  });
+}
+
+// Update "game" props
+export async function setNextActivePlayer(lobby) {
+  const { activePlayer, playerQueue } = lobby.game;
+  const possibleNextPlayerIndex = activePlayer + 1;
+  const queueIndexes = Object.values(playerQueue).length - 1;
+  const nextPlayerIndex =
+    possibleNextPlayerIndex > queueIndexes ? 0 : possibleNextPlayerIndex;
+  await getLobbyRefByID(lobby.meta.id).child("game").update({
+    activePlayer: nextPlayerIndex,
+  });
 }

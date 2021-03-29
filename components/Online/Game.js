@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Button, Dialog, Text } from "react-native-ui-lib";
 
+import NextPlayerAnnouncement from "./GameComponents/NextPlayerAnnouncement";
 import Announcement from "./GameComponents/Announcement";
 import WordExpression from "./GameComponents/WordExpression";
 
@@ -13,18 +14,11 @@ import { useFirebaseListener } from "../../utils/hooks";
 const { LOBBY_STATUS } = CONST_API;
 
 export default function Game({ navigation, route }) {
-  const uid = API.getCurrentUserUID();
   const { lobbyID } = route.params;
-  const {
-    data: lobby = {
-      game: {},
-      meta: {},
-      rules: {},
-      teams: {},
-    },
-    isLoading,
-    error,
-  } = useFirebaseListener(`/lobbies/${lobbyID}`, "lobby");
+  const { data: lobby = {}, isLoading, error } = useFirebaseListener(
+    `/lobbies/${lobbyID}`,
+    "lobby"
+  );
   if (!lobby || !lobby.meta?.status) return null;
 
   const components = {
@@ -33,7 +27,13 @@ export default function Game({ navigation, route }) {
         heading="Let's get started!"
         subheading={CONST.ROUND_TYPE.display[lobby.meta.status]}
         text={CONST.ROUND_TYPE_HINT[lobby.meta.status]}
-        action={{ label: "Let's go!", onClick: () => {} }}
+        action={{
+          label: "Let's go!",
+          onClick: async () => {
+            await API.setNextActivePlayer(lobby);
+            await API.updateLobbyStatus(lobby, LOBBY_STATUS.PAUSE_NEXT_PLAYER);
+          },
+        }}
       />
     ),
     [LOBBY_STATUS.PAUSE_ROUND_TWO]: () => (
@@ -52,13 +52,9 @@ export default function Game({ navigation, route }) {
         action={{ label: "Let's go!", onClick: () => {} }}
       />
     ),
-    [LOBBY_STATUS.PAUSE_UP_NEXT]: () => (
-      <Announcement
-        heading={`Hand the phone to A in B`}
-        subheading=""
-        text={CONST.ROUND_TYPE_HINT[lobby.meta.status]}
-        action={{ label: "I'm ready!", onClick: () => {} }}
-      />
+    // Next Player
+    [LOBBY_STATUS.PAUSE_NEXT_PLAYER]: () => (
+      <NextPlayerAnnouncement lobby={lobby} />
     ),
     [LOBBY_STATUS.ROUND_ONE]: () => <WordExpression lobby={lobby} />,
     [LOBBY_STATUS.ROUND_TWO]: () => <WordExpression lobby={lobby} />,
