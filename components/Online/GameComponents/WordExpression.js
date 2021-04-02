@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import { Vibration } from "react-native";
 import * as CONST from "../../../constants";
 import * as API from "../../../utils/api";
+import * as API_CONST from "../../../constants/api";
 
-import { View, Button, Dialog, Text } from "react-native-ui-lib";
+import { View, Button, Dialog, Text, ActionBar } from "react-native-ui-lib";
 
 export default function WordExpression({ lobby }) {
   const playerTimerRef = useRef(null);
@@ -11,25 +12,33 @@ export default function WordExpression({ lobby }) {
     parseInt(lobby.rules.roundTimer) || 30
   );
 
-  const wordToGuess = "123";
-
   const currentUID = API.getCurrentUserUID();
   const activePlayerUID = lobby.game.playerQueue[lobby.game.activePlayer];
   const currentPlayerIsActive = currentUID === activePlayerUID;
 
   const currentWordID = Object.values(lobby.game.activeWordIDs)[0];
   const currentWordDetails = lobby.game.availableWords[currentWordID];
+  const wordsLeftCount = Object.keys(lobby.game.availableWords || {}).length;
 
   useEffect(handleTimer, [playerTimeleft]);
+
+  async function handleGuessedWord(wordDetails) {
+    const isLastWord = wordsLeftCount === 1;
+    if (isLastWord) {
+      await API.updateLobbyStatus(
+        lobby,
+        API_CONST.LOBBY_STATUS.PAUSE_ROUND_TWO
+      );
+      await API.setNextActivePlayer(lobby);
+      await API.resetAvailableWords(lobby);
+      return;
+    }
+    await API.addGuessedWord(lobby);
+  }
 
   function handleTimer() {
     if (!currentPlayerIsActive) return;
 
-    // TODO: Handle timer server side by setting a new Date ms for when it starts
-    // This way all devices are synced and we can display a timer on all screens
-
-    // When active player loads component, set future ms
-    // by adding roundTimer to ms date now.
     playerTimerRef.current = setTimeout(
       () => setPlayerTimeLeft(playerTimeleft - 1),
       1000
@@ -65,7 +74,7 @@ export default function WordExpression({ lobby }) {
       <Button
         text30
         label="Guessed it!"
-        onPress={() => handleGuessedWord(wordToGuess)}
+        onPress={() => handleGuessedWord(currentWordDetails)}
       />
       {/* {showRoundTypeHint && (
         <View style={{ position: "absolute", bottom: 70 }}>
@@ -80,22 +89,22 @@ export default function WordExpression({ lobby }) {
         marginT-20
         label="End my turn"
         onPress={() => setShowSkipTurnDialog(true)}
-      />
+      />  */}
       <ActionBar
         actions={[
-          {
-            label: "End game",
-            red30: true,
-            onPress: () => setShowEndGameDialog(true),
-          },
-          {
-            label: `Round: ${CONST.ROUND_TYPE.display[round]}`,
-            labelStyle: { fontWeight: "bold" },
-            onPress: toggleRoundHint,
-          },
-          { label: `Words left: ${unguessedWords.length}` },
+          // {
+          //   label: "End game",
+          //   red30: true,
+          //   onPress: () => setShowEndGameDialog(true),
+          // },
+          // {
+          //   label: `Round: ${CONST.ROUND_TYPE.display[round]}`,
+          //   labelStyle: { fontWeight: "bold" },
+          //   onPress: toggleRoundHint,
+          // },
+          { label: `Words left: ${wordsLeftCount}` },
         ]}
-      /> */}
+      />
     </View>
   );
 }

@@ -22,6 +22,7 @@ export default function Game({ navigation, route }) {
   if (!lobby || !lobby.meta?.status) return null;
 
   const components = {
+    // Round explanation
     [LOBBY_STATUS.PAUSE_ROUND_ONE]: () => (
       <Announcement
         heading="Let's get started!"
@@ -30,7 +31,6 @@ export default function Game({ navigation, route }) {
         action={{
           label: "Let's go!",
           onClick: async () => {
-            await API.setNextActivePlayer(lobby);
             await API.updateLobbyStatus(lobby, LOBBY_STATUS.PAUSE_NEXT_PLAYER);
           },
         }}
@@ -41,7 +41,12 @@ export default function Game({ navigation, route }) {
         heading="Let's get started!"
         subheading={CONST.ROUND_TYPE.display[lobby.meta.status]}
         text={CONST.ROUND_TYPE_HINT[lobby.meta.status]}
-        action={{ label: "Let's go!", onClick: () => {} }}
+        action={{
+          label: "Let's go!",
+          onClick: async () => {
+            await API.updateLobbyStatus(lobby, LOBBY_STATUS.PAUSE_NEXT_PLAYER);
+          },
+        }}
       />
     ),
     [LOBBY_STATUS.PAUSE_ROUND_THREE]: () => (
@@ -49,13 +54,19 @@ export default function Game({ navigation, route }) {
         heading="Let's get started!"
         subheading={CONST.ROUND_TYPE.display[lobby.meta.status]}
         text={CONST.ROUND_TYPE_HINT[lobby.meta.status]}
-        action={{ label: "Let's go!", onClick: () => {} }}
+        action={{
+          label: "Let's go!",
+          onClick: async () => {
+            await API.updateLobbyStatus(lobby, LOBBY_STATUS.PAUSE_NEXT_PLAYER);
+          },
+        }}
       />
     ),
     // Next Player
     [LOBBY_STATUS.PAUSE_NEXT_PLAYER]: () => (
       <NextPlayerAnnouncement lobby={lobby} />
     ),
+    // In Round
     [LOBBY_STATUS.ROUND_ONE]: () => <WordExpression lobby={lobby} />,
     [LOBBY_STATUS.ROUND_TWO]: () => <WordExpression lobby={lobby} />,
     [LOBBY_STATUS.ROUND_THREE]: () => <WordExpression lobby={lobby} />,

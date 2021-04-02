@@ -1,3 +1,5 @@
+import _ from "lodash";
+
 import { capitalize } from "./index";
 import { DB } from "../constants";
 import * as UTIL from "./index";
@@ -291,4 +293,34 @@ export async function setNextActivePlayer(lobby) {
   await getLobbyRefByID(lobby.meta.id).child("game").update({
     activePlayer: nextPlayerIndex,
   });
+}
+
+export async function addGuessedWord(lobby) {
+  const previousWordID = lobby.game.activeWordIDs[0];
+  const nextWordID = Object.keys(lobby.game.availableWords).find(
+    (wordID) => wordID !== previousWordID && !lobby.game.guessedWords?.[wordID]
+  );
+  await getLobbyRefByID(lobby.meta.id)
+    .child("game")
+    .update({
+      activeWordIDs: [nextWordID],
+      availableWords: _.omit(lobby.game.availableWords, previousWordID),
+      guessedWords: {
+        ...lobby.game.guessedWords,
+        [previousWordID]: lobby.game.availableWords[previousWordID],
+      },
+    });
+}
+
+export async function resetAvailableWords(lobby) {
+  const shuffledWords = UTIL.shuffle(
+    Object.entries(lobby.game.guessedWords || {})
+  );
+  await getLobbyRefByID(lobby.meta.id)
+    .child("game")
+    .update({
+      guessedWords: null,
+      availableWords: Object.fromEntries(shuffledWords),
+      activeWordIDs: [shuffledWords[0][1].id],
+    });
 }

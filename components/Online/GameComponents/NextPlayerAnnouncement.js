@@ -4,6 +4,7 @@ import _ from "lodash";
 import Announcement from "./Announcement";
 
 import * as CONST from "../../../constants";
+import * as API_CONST from "../../../constants/api";
 import * as API from "../../../utils/api";
 
 export default function NextPlayerAnnouncement({ lobby }) {
@@ -13,11 +14,18 @@ export default function NextPlayerAnnouncement({ lobby }) {
   const nextPlayerUID = lobby.game.playerQueue[lobby.game.activePlayer];
   const nextIsCurrentPlayer = currentUID === nextPlayerUID;
 
-  useEffect(getNextPlayer, []);
+  useEffect(() => {
+    async function getNextPlayer() {
+      const nextPlayerDetails = await API.getUserByUID(nextPlayerUID);
+      // console.log({ nextPlayer, currentUID, nextPlayerDetails });
 
-  async function getNextPlayer() {
-    const nextPlayerDetails = await API.getUserByUID(nextPlayerUID);
-    setNextPlayer(nextPlayerDetails);
+      setNextPlayer(nextPlayerDetails);
+    }
+    getNextPlayer();
+  }, [nextPlayerUID]);
+
+  async function gotoNextRound() {
+    await API.updateLobbyStatus(lobby, API_CONST.LOBBY_STATUS.ROUND_TWO);
   }
 
   function getPlayerTeamName(uid) {
@@ -44,7 +52,9 @@ export default function NextPlayerAnnouncement({ lobby }) {
       subheading=""
       text={CONST.ROUND_TYPE_HINT[lobby.meta.status]}
       action={
-        nextIsCurrentPlayer ? { label: "I'm ready!", onClick: () => {} } : null
+        nextIsCurrentPlayer
+          ? { label: "I'm ready!", onClick: gotoNextRound }
+          : null
       }
     />
   );
