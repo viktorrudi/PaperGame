@@ -39,7 +39,7 @@ export default function WordSetup({ navigation, route }) {
     if (!lobby.rules?.minWords) return [];
     let newWords = [];
     for (let i = 0; i < lobby.rules.minWords; i++) {
-      newWords.push(UTIL.getDefaultDbProps(API.getCurrentUserUID()).WORD());
+      newWords.push(API.getDefaultDbProps(API.getCurrentUserUID()).WORD());
     }
     return newWords;
   }

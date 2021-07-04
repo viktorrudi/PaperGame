@@ -25,15 +25,19 @@ export default function WordExpression({ lobby }) {
   async function handleGuessedWord(wordDetails) {
     const isLastWord = wordsLeftCount === 1;
     if (isLastWord) {
-      await API.updateLobbyStatus(
-        lobby,
-        API_CONST.LOBBY_STATUS.PAUSE_ROUND_TWO
-      );
-      await API.setNextActivePlayer(lobby);
+      await goToNextPlayer();
       await API.resetAvailableWords(lobby);
       return;
     }
     await API.addGuessedWord(lobby);
+  }
+
+  async function goToNextPlayer() {
+    await API.setNextActivePlayer(lobby);
+    await API.updateLobbyStatus(
+      lobby,
+      API_CONST.LOBBY_STATUS.PLAYER_ANNOUNCEMENT
+    );
   }
 
   function handleTimer() {
@@ -47,6 +51,7 @@ export default function WordExpression({ lobby }) {
     if (playerTimeleft <= 0) {
       Vibration.vibrate(1000);
       clearTimeout(playerTimerRef.current);
+      goToNextPlayer();
     }
   }
 

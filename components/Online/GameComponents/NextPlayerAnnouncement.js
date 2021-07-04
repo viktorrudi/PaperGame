@@ -17,20 +17,18 @@ export default function NextPlayerAnnouncement({ lobby }) {
   useEffect(() => {
     async function getNextPlayer() {
       const nextPlayerDetails = await API.getUserByUID(nextPlayerUID);
-      // console.log({ nextPlayer, currentUID, nextPlayerDetails });
-
       setNextPlayer(nextPlayerDetails);
     }
     getNextPlayer();
   }, [nextPlayerUID]);
 
-  async function gotoNextRound() {
-    await API.updateLobbyStatus(lobby, API_CONST.LOBBY_STATUS.ROUND_TWO);
+  async function goToRound() {
+    await API.updateLobbyStatus(lobby, CONST.LOBBY_STATUS.IN_ROUND);
   }
 
   function getPlayerTeamName(uid) {
     const team = Object.values(lobby.teams).find((team) => {
-      const players = Object.keys(team.players);
+      const players = Object.keys(team.players || {});
       return players.includes(uid);
     });
     return team?.displayName || "Unknown";
@@ -52,9 +50,7 @@ export default function NextPlayerAnnouncement({ lobby }) {
       subheading=""
       text={CONST.ROUND_TYPE_HINT[lobby.meta.status]}
       action={
-        nextIsCurrentPlayer
-          ? { label: "I'm ready!", onClick: gotoNextRound }
-          : null
+        nextIsCurrentPlayer ? { label: "I'm ready!", onClick: goToRound } : null
       }
     />
   );

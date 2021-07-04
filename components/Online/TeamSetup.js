@@ -46,7 +46,7 @@ export default function TeamSetup({ navigation, route }) {
   async function handleCreateTeam() {
     await API.createTeam(
       lobby.meta.id,
-      UTIL.getDefaultDbProps(API.getCurrentUserUID()).TEAM()
+      API.getDefaultDbProps(API.getCurrentUserUID()).TEAM()
     );
   }
 

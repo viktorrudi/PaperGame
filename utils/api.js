@@ -105,11 +105,29 @@ export async function getUserByUID(uid) {
   }
 }
 
-export async function createLobby(lobbyName) {
-  const uid = getCurrentUserUID();
-  const lobbiesRef = firebase.database().ref("/lobbies");
-  const lobbyKey = lobbiesRef.push().key;
-  lobbiesRef.child(lobbyKey).set({
+export function getDefaultDbProps(userID) {
+  return {
+    TEAM: (id, name) => ({
+      id: id || Math.floor(Math.random() * 1000000),
+      displayName: name || UTIL.randomTeamName(),
+      score: 0,
+      powerPoints: 10,
+      players: [],
+    }),
+    WORD: (id = UTIL.getRandomID(), author) => ({
+      id: id,
+      author: author || userID,
+      word: "",
+    }),
+  };
+}
+
+export function getDefaultLobbyProps(
+  lobbyKey,
+  uid = getCurrentUserUID(),
+  lobbyName = ""
+) {
+  return {
     meta: {
       id: lobbyKey,
       creator: uid,
@@ -128,6 +146,8 @@ export async function createLobby(lobbyName) {
       guessedWords: 0,
       // wordID: { id, word, author }
       availableWords: 0,
+      // 0|1|2
+      activeRound: 0,
     },
     rules: {
       roundTimer: "30",
@@ -135,10 +155,18 @@ export async function createLobby(lobbyName) {
     },
     // teamID: { id, displayName, score, powerPoints, players[uid] }
     teams: {
-      1337: UTIL.getDefaultDbProps(getCurrentUserUID()).TEAM(1337),
-      420: UTIL.getDefaultDbProps(getCurrentUserUID()).TEAM(420),
+      1337: getDefaultDbProps(getCurrentUserUID()).TEAM(1337),
+      420: getDefaultDbProps(getCurrentUserUID()).TEAM(420),
     },
-  });
+  };
+}
+
+export async function createLobby(lobbyName) {
+  const lobbiesRef = firebase.database().ref("/lobbies");
+  const lobbyKey = lobbiesRef.push().key;
+  lobbiesRef
+    .child(lobbyKey)
+    .set(getDefaultLobbyProps(lobbyKey, getCurrentUserUID(), lobbyName));
   return lobbyKey;
 }
 
@@ -262,7 +290,7 @@ export async function initializeGame(lobby) {
   const [firstWord] = Object.keys(lobby.game.availableWords);
 
   const metaData = {
-    status: CONST_API.LOBBY_STATUS.PAUSE_ROUND_ONE,
+    status: CONST_API.LOBBY_STATUS.ROUND_EXPLANATION,
   };
   const gameData = {
     activePlayer: 0,
@@ -275,11 +303,18 @@ export async function initializeGame(lobby) {
   });
 }
 
-// Update "meta" props
 export async function updateLobbyStatus(lobby, nextStatus) {
   await getLobbyRefByID(lobby.meta.id).child("meta").update({
     status: nextStatus,
   });
+}
+
+export async function setNextRound(lobby) {
+  await getLobbyRefByID(lobby.meta.id)
+    .child("meta")
+    .update({
+      activeRound: lobby.game.activeRound + 1,
+    });
 }
 
 // Update "game" props
