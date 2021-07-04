@@ -4,7 +4,7 @@ import * as CONST from "../constants";
 import * as API from "../utils/api";
 
 function Login({ navigation }) {
-  const [email, setEmail] = useState("vrudi91@gmail.com");
+  const [email, setEmail] = useState("0@test.com");
   const [password, setPassword] = useState("12345678");
   const [error, setError] = useState(null);
 

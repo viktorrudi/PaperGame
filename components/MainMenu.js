@@ -6,6 +6,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { TouchableHighlight, Linking } from "react-native";
 import { View, Text, Button, Image } from "react-native-ui-lib";
 
+import { FirebaseSeeder } from "../utils/db";
 import * as CONST from "../constants";
 import * as API from "../utils/api";
 import githubLogo from "../assets/github-logo.png";
@@ -40,6 +41,14 @@ function MainMenu({ navigation, isUserAuth, userEmail }) {
         onPress={async () => {
           if (isUserAuth) await API.signOut();
           navigation.navigate(CONST.ROUTE.LOGIN);
+        }}
+      />
+      <Button
+        text70
+        size="small"
+        label="SEED"
+        onPress={() => {
+          FirebaseSeeder().lobby().seed();
         }}
       />
 
