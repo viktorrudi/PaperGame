@@ -76,7 +76,7 @@ export default function Lobby({ navigation, route }) {
 
   async function handleLeaveLobby() {
     if (inTeam) await API.leaveTeam(lobbyID, inTeam.id);
-    if (usersWords?.length > 0) {
+    if (usersWords?.length > 0 && !isLobbyInGame()) {
       await API.clearWordsFromLobby(
         lobbyID,
         usersWords.map((w) => w.id)
@@ -90,11 +90,12 @@ export default function Lobby({ navigation, route }) {
     goToGame();
   }
 
+  function isLobbyInGame() {
+    return CONST_API.LOBBY_STATUS_GROUP.IN_GAME.includes(lobby.meta?.status);
+  }
+
   function redirectIfInGame() {
-    const isLobbyInGame = CONST_API.LOBBY_STATUS_GROUP.IN_GAME.includes(
-      lobby.meta?.status
-    );
-    if (isLobbyInGame) goToGame();
+    if (isLobbyInGame()) goToGame();
   }
 
   function goToGame() {

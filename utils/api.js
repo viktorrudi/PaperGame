@@ -3,6 +3,7 @@ import _ from "lodash";
 import { capitalize } from "./index";
 import { DB } from "../constants";
 import * as UTIL from "./index";
+import * as CONST from "../constants";
 import * as CONST_API from "../constants/api";
 import firebase from "firebase";
 
@@ -310,14 +311,27 @@ export async function updateLobbyStatus(lobby, nextStatus) {
 }
 
 export async function setNextRound(lobby) {
+  const nextActiveRound = lobby.game.activeRound + 1;
+
+  const isGameOver = nextActiveRound === 3;
+  console.log({ isGameOver, lobby });
+  if (isGameOver) {
+    await updateLobbyStatus(lobby, CONST_API.LOBBY_STATUS.GAME_OVER);
+    return CONST_API.LOBBY_STATUS.GAME_OVER;
+  }
+
   await getLobbyRefByID(lobby.meta.id).update({
     game: {
       ...lobby.game,
-      activeRound: lobby.game.activeRound + 1,
+      activeRound: nextActiveRound,
       activePlayer: getNextPlayerIndex(lobby),
     },
-    meta: { ...lobby.meta, status: CONST_API.LOBBY_STATUS.ROUND_EXPLANATION },
+    meta: {
+      ...lobby.meta,
+      status: CONST_API.LOBBY_STATUS.ROUND_EXPLANATION,
+    },
   });
+  return CONST_API.LOBBY_STATUS.ROUND_EXPLANATION;
 }
 
 function getNextPlayerIndex(lobby) {
@@ -341,21 +355,43 @@ export async function addGuessedWord(lobby) {
   const nextWordID = Object.keys(lobby.game.availableWords)
     .filter((wordKey) => !(wordKey in (lobby.game.guessedWords || {})))
     .find((wordID) => wordID !== previousWordID);
-  await getLobbyRefByID(lobby.meta.id)
-    .child("game")
-    .update({
+
+  const playerUid = Object.values(lobby.game.playerQueue)[
+    lobby.game.activePlayer
+  ];
+  const updatedTeams = Object.values(lobby.teams).reduce((allTeams, team) => {
+    if (playerUid in team.players) {
+      return {
+        ...allTeams,
+        [team.id]: {
+          ...team,
+          score: team.score + 1,
+        },
+      };
+    }
+    return {
+      ...allTeams,
+      [team.id]: team,
+    };
+  }, {});
+
+  await getLobbyRefByID(lobby.meta.id).update({
+    game: {
+      ...lobby.game,
       activeWordIDs: [nextWordID],
       availableWords: _.omit(lobby.game.availableWords, previousWordID),
       guessedWords: {
         ...lobby.game.guessedWords,
         [previousWordID]: lobby.game.availableWords[previousWordID],
       },
-    });
+    },
+    teams: updatedTeams,
+  });
 }
 
 export async function resetAvailableWords(lobby) {
   const shuffledWords = UTIL.shuffle(
-    Object.entries(lobby.game.guessedWords || {})
+    Object.entries({ ...lobby.game.guessedWords, ...lobby.game.availableWords })
   );
   await getLobbyRefByID(lobby.meta.id)
     .child("game")

@@ -4,6 +4,7 @@ import { View, Button, Dialog, Text } from "react-native-ui-lib";
 import NextPlayerAnnouncement from "./GameComponents/NextPlayerAnnouncement";
 import Announcement from "./GameComponents/Announcement";
 import WordExpression from "./GameComponents/WordExpression";
+import GameEnd from "./GameComponents/GameEnd";
 
 import * as API from "../../utils/api";
 import * as CONST from "../../constants";
@@ -47,6 +48,7 @@ export default function Game({ navigation, route }) {
     [LOBBY_STATUS.PLAYER_ANNOUNCEMENT]: () => (
       <NextPlayerAnnouncement lobby={lobby} />
     ),
+    [LOBBY_STATUS.GAME_OVER]: () => <GameEnd lobby={lobby} />,
   };
 
   const MetaComponent = metaComponents[lobby.meta.status];

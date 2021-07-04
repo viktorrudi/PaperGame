@@ -24,6 +24,7 @@ import JoinLobby from "./components/Online/JoinLobby";
 import Lobby from "./components/Online/Lobby";
 import OnlineTeamSetup from "./components/Online/TeamSetup";
 import OnlineWordSetup from "./components/Online/WordSetup";
+import OnlineGameEnd from "./components/Online/GameComponents/GameEnd";
 
 import * as CONST from "./constants";
 
@@ -113,6 +114,9 @@ const screens = {
       title: "Add some words",
       ...headerStyle,
     },
+  },
+  [CONST.ROUTE.ONLINE_GAME_END]: {
+    Component: OnlineGameEnd,
   },
   [CONST.ROUTE.ONLINE_SETUP_WORDS]: {
     Component: OnlineWordSetup,

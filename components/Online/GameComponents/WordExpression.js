@@ -22,10 +22,11 @@ export default function WordExpression({ lobby }) {
 
   useEffect(handleTimer, [playerTimeleft]);
 
-  async function handleGuessedWord(wordDetails) {
+  async function handleGuessedWord() {
     const isLastWord = wordsLeftCount === 1;
     if (isLastWord) {
-      await API.setNextRound(lobby);
+      const nextRoundStatus = await API.setNextRound(lobby);
+      if (nextRoundStatus === API_CONST.LOBBY_STATUS.GAME_OVER) return;
       await API.resetAvailableWords(lobby);
       return;
     }
@@ -76,11 +77,7 @@ export default function WordExpression({ lobby }) {
       <Text text10 marginB-30 blue30 center marginH-20>
         {currentWordDetails.word}
       </Text>
-      <Button
-        text30
-        label="Guessed it!"
-        onPress={() => handleGuessedWord(currentWordDetails)}
-      />
+      <Button text30 label="Guessed it!" onPress={handleGuessedWord} />
       {/* {showRoundTypeHint && (
         <View style={{ position: "absolute", bottom: 70 }}>
           <Text center style={{ alignSelf: "flex-end" }}>
