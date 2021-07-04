@@ -3,7 +3,6 @@ import _ from "lodash";
 import { capitalize } from "./index";
 import { DB } from "../constants";
 import * as UTIL from "./index";
-import * as CONST from "../constants";
 import * as CONST_API from "../constants/api";
 import firebase from "firebase";
 
@@ -136,8 +135,8 @@ export async function createLobby(lobbyName) {
     },
     // teamID: { id, displayName, score, powerPoints, players[uid] }
     teams: {
-      1337: CONST.DEFAULT_DB_PROPS.TEAM(1337),
-      420: CONST.DEFAULT_DB_PROPS.TEAM(420),
+      1337: UTIL.getDefaultDbProps(getCurrentUserUID()).TEAM(1337),
+      420: UTIL.getDefaultDbProps(getCurrentUserUID()).TEAM(420),
     },
   });
   return lobbyKey;

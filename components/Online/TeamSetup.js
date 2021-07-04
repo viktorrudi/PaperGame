@@ -17,10 +17,11 @@ import { useFirebaseListener } from "../../utils/hooks";
 import { BlurView } from "@react-native-community/blur";
 
 export default function TeamSetup({ navigation, route }) {
-  const { data: lobby, isLoading, error } = useFirebaseListener(
-    `/lobbies/${route.params.lobbyID}`,
-    "lobby"
-  );
+  const {
+    data: lobby,
+    isLoading,
+    error,
+  } = useFirebaseListener(`/lobbies/${route.params.lobbyID}`, "lobby");
   if (isLoading) return <Text>Loading</Text>;
   if (!lobby || error) return <Text>Sorry, something happened</Text>;
 
@@ -43,7 +44,10 @@ export default function TeamSetup({ navigation, route }) {
   }
 
   async function handleCreateTeam() {
-    await API.createTeam(lobby.meta.id, CONST.DEFAULT_DB_PROPS.TEAM());
+    await API.createTeam(
+      lobby.meta.id,
+      UTIL.getDefaultDbProps(API.getCurrentUserUID()).TEAM()
+    );
   }
 
   return (

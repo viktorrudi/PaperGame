@@ -99,3 +99,20 @@ export function randomTeamName() {
   const names = ["Team A", "Team B", "Team C", "Team D", "Team E"];
   return names[Math.floor(Math.random() * names.length)];
 }
+
+export function getDefaultDbProps(userID) {
+  return {
+    TEAM: (id, name) => ({
+      id: id || Math.floor(Math.random() * 1000000),
+      displayName: name || randomTeamName(),
+      score: 0,
+      powerPoints: 10,
+      players: [],
+    }),
+    WORD: (id = getRandomID(), author) => ({
+      id: id,
+      author: author || userID,
+      word: "",
+    }),
+  };
+}

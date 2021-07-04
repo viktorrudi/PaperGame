@@ -1,5 +1,3 @@
-import * as UTIL from "../utils";
-import * as API from "../utils/api";
 import * as CONST_API from "./api";
 
 export const VERSION_NUMBER = "0.0.2";
@@ -129,20 +127,5 @@ export const RANDOM_TEAM_NAMES = [
   "Team d",
   "Team e",
 ];
-
-export const DEFAULT_DB_PROPS = {
-  TEAM: (id, name) => ({
-    id: id || Math.floor(Math.random() * 1000000),
-    displayName: name || UTIL.randomTeamName(),
-    score: 0,
-    powerPoints: 10,
-    players: [],
-  }),
-  WORD: (id, author) => ({
-    id: id || UTIL.getRandomID(),
-    author: author || API.getCurrentUserUID(),
-    word: "",
-  }),
-};
 
 export * from "./api";

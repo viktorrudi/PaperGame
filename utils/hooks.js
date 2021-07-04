@@ -1,5 +1,6 @@
-import { useEffect, useState, useRef } from "react";
+import React, { useLayoutEffect, useEffect, useState, useRef } from "react";
 import { BarCodeScanner } from "expo-barcode-scanner";
+import { HeaderBackButton } from "@react-navigation/stack";
 import firebase from "firebase";
 
 export function useFirebaseListener(refTarget, refName) {
@@ -48,6 +49,27 @@ export function useQRScanner() {
     qrData,
     onScan,
   };
+}
+
+export function useHeaderRouting({ navigation, onBack, onForward }, deps = []) {
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      ...(onBack
+        ? {
+            headerLeft: (props) => (
+              <HeaderBackButton {...props} onPress={onBack} />
+            ),
+          }
+        : {}),
+      ...(onForward
+        ? {
+            headerRight: (props) => (
+              <HeaderBackButton {...props} onPress={onForward} />
+            ),
+          }
+        : {}),
+    });
+  }, [navigation, onBack, onForward, ...deps]);
 }
 
 function usePrevious(value) {

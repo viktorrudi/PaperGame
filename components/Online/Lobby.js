@@ -43,6 +43,7 @@ export default function Lobby({ navigation, route }) {
 
   if (isLoading) return <Text>Loading</Text>;
   if (!lobby || !lobby.game || error) {
+    console.error("Something happened", lobby, error);
     return <Text>Sorry, something happened</Text>;
   }
 
@@ -63,24 +64,25 @@ export default function Lobby({ navigation, route }) {
 
   async function closeLobby() {
     try {
-      await API.deleteLobby(lobby.meta.id);
       navigation.navigate(CONST.ROUTE.JOIN_LOBBY, { error: null });
+      await API.deleteLobby(lobby.meta.id);
     } catch (e) {
+      console.error("Unable to close lobby", e);
       navigation.navigate(CONST.ROUTE.JOIN_LOBBY, {
-        error: { message: "Unable to delete lobby" },
+        error: { message: "Unable to close lobby" },
       });
     }
   }
 
   async function handleLeaveLobby() {
     if (inTeam) await API.leaveTeam(lobbyID, inTeam.id);
-    if (usersWords.length > 0) {
+    if (usersWords?.length > 0) {
       await API.clearWordsFromLobby(
         lobbyID,
         usersWords.map((w) => w.id)
       );
     }
-    navigation.navigate(CONST.ROUTE.JOIN_LOBBY);
+    navigation.navigate(CONST.ROUTE.JOIN_LOBBY, { error: null });
   }
 
   async function handleStartGame() {

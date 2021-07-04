@@ -1,15 +1,22 @@
-import React, { useState, useEffect } from "react";
+import React, { useLayoutEffect, useState, useEffect } from "react";
 import { View, Button, TextField, Toast, Text } from "react-native-ui-lib";
 import { FlatList } from "react-native";
 
 import * as API from "../../utils/api";
+import * as UTIL from "../../utils";
 import * as CONST from "../../constants";
 import * as CONST_API from "../../constants/api";
+import { useHeaderRouting } from "../../utils/hooks";
 
 export default function JoinLobby({ navigation, route }) {
   const [lobbyID, setLobbyID] = useState("");
   const [lobbies, setLobbies] = useState([]);
   const [showError, setShowError] = useState(false);
+
+  useHeaderRouting({
+    navigation,
+    onBack: () => navigation.navigate(CONST.ROUTE.MAIN_MENU),
+  });
 
   useEffect(() => {
     fillAvailableLobbies();
@@ -81,11 +88,11 @@ export default function JoinLobby({ navigation, route }) {
         <Text>Available Lobbies</Text>
         <FlatList
           data={lobbies}
+          keyExtractor={(lobby) => lobby.meta.id}
           renderItem={({ item: lobby }) => {
             return (
               <View
                 marginT-20
-                key={lobby.meta.id}
                 style={{
                   display: "flex",
                   flexDirection: "row",
