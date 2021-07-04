@@ -25,7 +25,7 @@ export default function WordExpression({ lobby }) {
   async function handleGuessedWord(wordDetails) {
     const isLastWord = wordsLeftCount === 1;
     if (isLastWord) {
-      await goToNextPlayer();
+      await API.setNextRound(lobby);
       await API.resetAvailableWords(lobby);
       return;
     }

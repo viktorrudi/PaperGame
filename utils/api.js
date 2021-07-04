@@ -310,30 +310,37 @@ export async function updateLobbyStatus(lobby, nextStatus) {
 }
 
 export async function setNextRound(lobby) {
-  await getLobbyRefByID(lobby.meta.id)
-    .child("meta")
-    .update({
+  await getLobbyRefByID(lobby.meta.id).update({
+    game: {
+      ...lobby.game,
       activeRound: lobby.game.activeRound + 1,
-    });
+      activePlayer: getNextPlayerIndex(lobby),
+    },
+    meta: { ...lobby.meta, status: CONST_API.LOBBY_STATUS.ROUND_EXPLANATION },
+  });
+}
+
+function getNextPlayerIndex(lobby) {
+  const { activePlayer, playerQueue } = lobby.game;
+  const possibleNextPlayerIndex = activePlayer + 1;
+  const queueIndexes = Object.values(playerQueue).length - 1;
+  return possibleNextPlayerIndex > queueIndexes ? 0 : possibleNextPlayerIndex;
 }
 
 // Update "game" props
 export async function setNextActivePlayer(lobby) {
-  const { activePlayer, playerQueue } = lobby.game;
-  const possibleNextPlayerIndex = activePlayer + 1;
-  const queueIndexes = Object.values(playerQueue).length - 1;
-  const nextPlayerIndex =
-    possibleNextPlayerIndex > queueIndexes ? 0 : possibleNextPlayerIndex;
-  await getLobbyRefByID(lobby.meta.id).child("game").update({
-    activePlayer: nextPlayerIndex,
-  });
+  await getLobbyRefByID(lobby.meta.id)
+    .child("game")
+    .update({
+      activePlayer: getNextPlayerIndex(lobby),
+    });
 }
 
 export async function addGuessedWord(lobby) {
   const previousWordID = lobby.game.activeWordIDs[0];
-  const nextWordID = Object.keys(lobby.game.availableWords).find(
-    (wordID) => wordID !== previousWordID && !lobby.game.guessedWords?.[wordID]
-  );
+  const nextWordID = Object.keys(lobby.game.availableWords)
+    .filter((wordKey) => !(wordKey in (lobby.game.guessedWords || {})))
+    .find((wordID) => wordID !== previousWordID);
   await getLobbyRefByID(lobby.meta.id)
     .child("game")
     .update({
