@@ -1,20 +1,14 @@
 import React, { useState } from "react";
-import { connect } from "react-redux";
 import { ScrollView } from "react-native";
-import {
-  View,
-  Button,
-  Text,
-  TextField,
-  ProgressiveImage,
-} from "react-native-ui-lib";
-import { TouchableHighlight, Linking } from "react-native";
+import { View, Button, Text, TextField } from "react-native-ui-lib";
+
+import PlayerCard from "./PlayerCard";
+import FullScreenLoader from "../FullScreenLoader";
 
 import * as API from "../../utils/api";
 import * as UTIL from "../../utils";
 import * as CONST from "../../constants";
 import { useFirebaseListener } from "../../utils/hooks";
-import { BlurView } from "@react-native-community/blur";
 
 export default function TeamSetup({ navigation, route }) {
   const {
@@ -22,7 +16,7 @@ export default function TeamSetup({ navigation, route }) {
     isLoading,
     error,
   } = useFirebaseListener(`/lobbies/${route.params.lobbyID}`, "lobby");
-  if (isLoading) return <Text>Loading</Text>;
+  if (isLoading) return <FullScreenLoader />;
   if (!lobby || error) return <Text>Sorry, something happened</Text>;
 
   const teams = Object.values(lobby.teams || {});
@@ -67,7 +61,7 @@ export default function TeamSetup({ navigation, route }) {
             <Team
               key={team.id}
               team={team}
-              buttonText={isInThisTeam ? "Leave" : "Join"}
+              buttonText={isInThisTeam ? "Leave Team" : "Join Team"}
               deleteAction={handleDeleteTeam}
               mainAction={isInThisTeam ? handleLeaveTeam : handleJoinTeam}
               handleUpdate={handleUpdateTeam}
@@ -80,7 +74,7 @@ export default function TeamSetup({ navigation, route }) {
 
         <Team
           isCreation
-          buttonText="Create team"
+          buttonText="Create another Team"
           mainAction={handleCreateTeam}
         />
       </View>
@@ -97,8 +91,9 @@ function Team({
   deleteAction,
   handleUpdate,
 }) {
-  const players = Object.values(team.players || {});
   const [newTeamName, setNewTeamName] = useState(team.displayName);
+
+  const playerUids = Object.keys(team.players || {});
 
   return (
     <View
@@ -113,6 +108,7 @@ function Team({
     >
       {!isCreation && (
         <TextField
+          title="Team Name"
           value={newTeamName}
           onChangeText={setNewTeamName}
           onBlur={() => {
@@ -130,37 +126,13 @@ function Team({
           flexDirection: "row",
           justifyContent: "center",
           flexWrap: "wrap",
-          marginTop: 20,
         }}
       >
-        {players.map(({ username, imageURL }) => {
-          const playerName =
-            username.length >= 25 ? username.slice(0, 25) + "..." : username;
-          return (
-            <View
-              key={username + imageURL}
-              style={{
-                marginRight: 10,
-                marginTop: 10,
-                maxWidth: 100,
-                display: "flex",
-                alignItems: "center",
-              }}
-            >
-              <ProgressiveImage
-                style={{
-                  height: 50,
-                  width: 50,
-                  borderRadius: 50,
-                  backgroundColor: "#68B7F1",
-                }}
-                source={{ uri: imageURL, cache: "reload" }}
-              />
-
-              <Text center>{playerName}</Text>
-            </View>
-          );
-        })}
+        {playerUids.length === 0 ? (
+          <Text>{isCreation ? "" : "No players here yet"}</Text>
+        ) : (
+          playerUids.map((uid) => <PlayerCard uid={uid} size="medium" />)
+        )}
       </View>
       <View
         style={{
@@ -170,11 +142,15 @@ function Team({
           marginTop: 10,
         }}
       >
-        <Button label={buttonText} onPress={() => mainAction(team)} />
+        <Button
+          style={isCreation ? { display: "flex", flexGrow: 1, height: 70 } : {}}
+          label={buttonText}
+          onPress={() => mainAction(team)}
+        />
         {shouldShow.deleteAction && (
           <Button
             size="small"
-            label="Delete"
+            label="Remove Team"
             outline
             red30
             style={{ borderColor: "red" }}

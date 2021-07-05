@@ -11,10 +11,12 @@ import {
 import { TouchableHighlight, ScrollView } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import * as ImageManipulator from "expo-image-manipulator";
-import { useFocusEffect } from "@react-navigation/native";
+
+import FullScreenLoader from "../FullScreenLoader";
 
 import { DB, DB_TYPE, IMAGE, ROUTE } from "../../constants";
 import * as API from "../../utils/api";
+import * as UTIL from "../../utils";
 
 function UserSetup({ navigation, userID }) {
   const [usernameField, setUsernameField] = useState("");
@@ -69,8 +71,8 @@ function UserSetup({ navigation, userID }) {
         }
       );
     } catch (e) {
-      console.log(e);
-      alert("uploadImage() error: ", e.message || "<Check console>");
+      console.error(e);
+      UTIL.toast("Sorry, failed to upload your image");
     }
   }
 
@@ -81,13 +83,8 @@ function UserSetup({ navigation, userID }) {
     });
   }
 
-  if (isLoading) {
-    return (
-      <View flex center>
-        <Text center>Loading</Text>
-      </View>
-    );
-  }
+  if (isLoading) return <FullScreenLoader />;
+
   return (
     <ScrollView style={{ margin: 30 }}>
       <View center marginB-40>

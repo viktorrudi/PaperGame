@@ -2,10 +2,12 @@ import React, { useState, useEffect } from "react";
 import _ from "lodash";
 import { QRCode } from "react-native-custom-qr-codes-expo";
 import { View, Button, Dialog, Text } from "react-native-ui-lib";
-import { Share, ScrollView, ToastAndroid } from "react-native";
+import { Share, ScrollView } from "react-native";
 
 import RowAction from "../Shared/RowAction";
+import FullScreenLoader from "../FullScreenLoader";
 
+import * as UTIL from "../../utils";
 import * as API from "../../utils/api";
 import * as CONST from "../../constants";
 import * as CONST_API from "../../constants/api";
@@ -41,10 +43,14 @@ export default function Lobby({ navigation, route }) {
 
   // useEffect(redirectIfInGame, [lobby.meta?.status, lobby.meta?.id]);
 
-  if (isLoading) return <Text>Loading</Text>;
+  if (isLoading) return <FullScreenLoader />;
   if (!lobby || !lobby.game || error) {
     console.error("Something happened", lobby, error);
-    return <Text>Sorry, something happened</Text>;
+    return (
+      <Text>
+        Sorry, something happened. Please try going back to restarting the app.
+      </Text>
+    );
   }
 
   const teams = Object.values(lobby.teams || {});
@@ -66,8 +72,10 @@ export default function Lobby({ navigation, route }) {
     try {
       navigation.navigate(CONST.ROUTE.JOIN_LOBBY, { error: null });
       await API.deleteLobby(lobby.meta.id);
+      UTIL.toast("Lobby closed");
     } catch (e) {
       console.error("Unable to close lobby", e);
+      UTIL.toast("Unable to close lobby");
       navigation.navigate(CONST.ROUTE.JOIN_LOBBY, {
         error: { message: "Unable to close lobby" },
       });
@@ -171,31 +179,32 @@ export default function Lobby({ navigation, route }) {
         <RowAction
           title="Round Timer"
           subtitle={`${lobby.rules.roundTimer} seconds`}
-          disabled={!isOwner || isLobbyInGame()}
-          disabled2={!isOwner || isLobbyInGame()}
-          button={{
-            label: "-",
-            action: () => {
-              if (lobby.rules.roundTimer <= 10) {
-                ToastAndroid.show("Minimum 10 seconds", ToastAndroid.SHORT);
-                return;
+          disabled={isLobbyInGame()}
+          disabled2={isLobbyInGame()}
+          {...(isOwner
+            ? {
+                button: {
+                  label: "-",
+                  action: () => {
+                    if (lobby.rules.roundTimer <= 10) {
+                      UTIL.toast("Minimum 10 seconds");
+                      return;
+                    }
+                    API.setRoundTimer(lobby, lobby.rules.roundTimer - 10);
+                  },
+                },
+                button2: {
+                  label: "+",
+                  action: () => {
+                    if (lobby.rules.roundTimer >= 500) {
+                      UTIL.toast("You've reached the maximum time limit");
+                      return;
+                    }
+                    API.setRoundTimer(lobby, lobby.rules.roundTimer + 10);
+                  },
+                },
               }
-              API.setRoundTimer(lobby, lobby.rules.roundTimer - 10);
-            },
-          }}
-          button2={{
-            label: "+",
-            action: () => {
-              if (lobby.rules.roundTimer >= 500) {
-                ToastAndroid.show(
-                  "You've reached the maximum time limit",
-                  ToastAndroid.SHORT
-                );
-                return;
-              }
-              API.setRoundTimer(lobby, lobby.rules.roundTimer + 10);
-            },
-          }}
+            : {})}
         />
 
         <Button
@@ -244,6 +253,7 @@ function ShareLobbyDialog({ visible, onDismiss, lobbyID }) {
         onDismiss();
       }
     } catch (e) {
+      UTIL.toast("An error occurred while sharing");
       console.error("Error sharing", e);
     }
   }

@@ -103,6 +103,7 @@ export async function getUserByUID(uid) {
     });
   } catch (e) {
     console.error("GET USER BY ID ERROR", e);
+    return null;
   }
 }
 
@@ -321,7 +322,7 @@ export async function setNextRound(lobby) {
   const nextActiveRound = lobby.game.activeRound + 1;
 
   const isGameOver = nextActiveRound === 3;
-  console.log({ isGameOver, lobby });
+
   if (isGameOver) {
     await updateLobbyStatus(lobby, CONST_API.LOBBY_STATUS.GAME_OVER);
     return CONST_API.LOBBY_STATUS.GAME_OVER;

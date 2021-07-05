@@ -1,5 +1,11 @@
 import * as CONST from "../constants";
 
+import { ToastAndroid } from "react-native";
+
+export function toast(message) {
+  ToastAndroid.show(message, ToastAndroid.SHORT);
+}
+
 export function shuffle(arr) {
   return arr.sort(() => 0.5 - Math.random());
 }
@@ -98,6 +104,6 @@ export function normalizeIDs(arr, idKey) {
 }
 
 export function randomTeamName() {
-  const names = ["Team A", "Team B", "Team C", "Team D", "Team E"];
+  const names = CONST.RANDOM_TEAM_NAMES;
   return names[Math.floor(Math.random() * names.length)];
 }

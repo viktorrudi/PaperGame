@@ -3,6 +3,7 @@ import React from "react";
 import { View, Text, Button } from "react-native-ui-lib";
 
 export default function Announcement({
+  children,
   heading,
   subheading,
   text,
@@ -15,6 +16,7 @@ export default function Announcement({
           {heading}
         </Text>
       ) : null}
+      {children}
       {subheading ? (
         <Text center text20 blue30>
           {subheading}

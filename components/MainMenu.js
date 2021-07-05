@@ -3,13 +3,14 @@ import firebase from "firebase";
 import { connect } from "react-redux";
 import { useFocusEffect } from "@react-navigation/native";
 
-import { TouchableHighlight, Linking, ToastAndroid } from "react-native";
+import { TouchableHighlight, Linking } from "react-native";
 import { View, Text, Button, Image } from "react-native-ui-lib";
 
 import { FirebaseSeeder } from "../utils/db";
 import * as CONST from "../constants";
 import * as CONST_API from "../constants/api";
 import * as API from "../utils/api";
+import * as UTIL from "../utils";
 import githubLogo from "../assets/github-logo.png";
 
 function MainMenu({ navigation, isUserAuth, userEmail }) {
@@ -59,7 +60,7 @@ function MainMenu({ navigation, isUserAuth, userEmail }) {
         label="SEED (start)"
         onPress={() => {
           FirebaseSeeder().lobby("start").seed();
-          ToastAndroid.show("Seeded", ToastAndroid.SHORT);
+          UTIL.toast("Seeded");
         }}
       />
       <Button
@@ -70,7 +71,7 @@ function MainMenu({ navigation, isUserAuth, userEmail }) {
           FirebaseSeeder()
             .lobby("end", CONST_API.LOBBY_STATUS.GAME_OVER)
             .seed();
-          ToastAndroid.show("Seeded", ToastAndroid.SHORT);
+          UTIL.toast("Seeded");
         }}
       />
 

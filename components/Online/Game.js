@@ -5,6 +5,7 @@ import NextPlayerAnnouncement from "./GameComponents/NextPlayerAnnouncement";
 import Announcement from "./GameComponents/Announcement";
 import WordExpression from "./GameComponents/WordExpression";
 import GameEnd from "./GameComponents/GameEnd";
+import FullScreenLoader from "../FullScreenLoader";
 
 import * as API from "../../utils/api";
 import * as CONST from "../../constants";
@@ -21,6 +22,7 @@ export default function Game({ navigation, route }) {
     isLoading,
     error,
   } = useFirebaseListener(`/lobbies/${lobbyID}`, "lobby");
+  if (isLoading) return <FullScreenLoader />;
   if (!lobby || !lobby.meta?.status) return null;
 
   const roundDetails = CONST.ROUND_DETAILS_BY_ORDER[lobby.game.activeRound];

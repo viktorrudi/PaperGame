@@ -24,15 +24,15 @@ export default function JoinLobby({ navigation, route }) {
 
   useEffect(() => {
     if (route.params?.error?.message) {
-      setShowError(true);
-      setTimeout(() => setShowError(false), 3000);
+      UTIL.toast(route.params?.error?.message);
+      fillAvailableLobbies();
     }
   }, [route.params?.error?.message]);
 
   async function fillAvailableLobbies() {
     try {
       const availableLobbies = (await API.getLobbies()) || {};
-      setLobbies(Object.values(availableLobbies));
+      setLobbies(Object.values(availableLobbies).slice(0, 10));
     } catch (e) {
       console.error("IN CREATE LOBBY:", error);
     }
