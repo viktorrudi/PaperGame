@@ -29,6 +29,8 @@ export default function Lobby({ navigation, route }) {
     error,
   } = useFirebaseListener(`/lobbies/${lobbyID}`, "lobby");
 
+  const roundTimer = parseInt(lobby?.rules?.roundTimer || "30");
+
   // Leave lobby if exiting lobby by using native back functionality
   useBackHandler(async () => {
     await handleLeaveLobby();
@@ -83,12 +85,16 @@ export default function Lobby({ navigation, route }) {
   }
 
   async function handleLeaveLobby() {
-    if (inTeam) await API.leaveTeam(lobbyID, inTeam.id);
-    if (usersWords?.length > 0 && !isLobbyInGame()) {
-      await API.clearWordsFromLobby(
-        lobbyID,
-        usersWords.map((w) => w.id)
-      );
+    if (!isLobbyInGame()) {
+      if (inTeam) {
+        await API.leaveTeam(lobbyID, inTeam.id);
+      }
+      if (usersWords?.length > 0) {
+        await API.clearWordsFromLobby(
+          lobbyID,
+          usersWords.map((w) => w.id)
+        );
+      }
     }
     navigation.navigate(CONST.ROUTE.JOIN_LOBBY, { error: null });
   }
@@ -178,7 +184,7 @@ export default function Lobby({ navigation, route }) {
 
         <RowAction
           title="Round Timer"
-          subtitle={`${lobby.rules.roundTimer} seconds`}
+          subtitle={`${roundTimer} seconds`}
           disabled={isLobbyInGame()}
           disabled2={isLobbyInGame()}
           {...(isOwner
@@ -186,21 +192,21 @@ export default function Lobby({ navigation, route }) {
                 button: {
                   label: "-",
                   action: () => {
-                    if (lobby.rules.roundTimer <= 10) {
+                    if (roundTimer <= 10) {
                       UTIL.toast("Minimum 10 seconds");
                       return;
                     }
-                    API.setRoundTimer(lobby, lobby.rules.roundTimer - 10);
+                    API.setRoundTimer(lobby, roundTimer - 10);
                   },
                 },
                 button2: {
                   label: "+",
                   action: () => {
-                    if (lobby.rules.roundTimer >= 500) {
+                    if (roundTimer >= 500) {
                       UTIL.toast("You've reached the maximum time limit");
                       return;
                     }
-                    API.setRoundTimer(lobby, lobby.rules.roundTimer + 10);
+                    API.setRoundTimer(lobby, roundTimer + 10);
                   },
                 },
               }
