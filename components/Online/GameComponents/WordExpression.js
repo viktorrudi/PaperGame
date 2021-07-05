@@ -5,8 +5,12 @@ import * as API from "../../../utils/api";
 import * as API_CONST from "../../../constants/api";
 
 import { View, Button, Dialog, Text, ActionBar } from "react-native-ui-lib";
+import { round } from "lodash";
 
-export default function WordExpression({ lobby }) {
+export default function WordExpression({ lobby, roundDetails }) {
+  const [dialog, setDialog] = useState(null);
+  const [showRoundHint, setShowRoundHint] = useState(false);
+
   const playerTimerRef = useRef(null);
   const [playerTimeleft, setPlayerTimeLeft] = useState(
     parseInt(lobby.rules.roundTimer) || 30
@@ -67,46 +71,80 @@ export default function WordExpression({ lobby }) {
   }
 
   return (
-    <View flex center style={{ height: "100%", marginTop: 300 }}>
-      <Text text20 center marginB-30>
-        {playerTimeleft}
-      </Text>
-      <Text text60 center>
-        Your word is
-      </Text>
-      <Text text10 marginB-30 blue30 center marginH-20>
-        {currentWordDetails.word}
-      </Text>
-      <Button text30 label="Guessed it!" onPress={handleGuessedWord} />
-      {/* {showRoundTypeHint && (
-        <View style={{ position: "absolute", bottom: 70 }}>
-          <Text center style={{ alignSelf: "flex-end" }}>
-            {CONST.ROUND_TYPE_HINT[round]}
-          </Text>
-        </View>
-      )} */}
-      {/* <Button
-        size="medium"
-        backgroundColor="#c0c0c0"
-        marginT-20
-        label="End my turn"
-        onPress={() => setShowSkipTurnDialog(true)}
-      />  */}
-      <ActionBar
-        actions={[
-          // {
-          //   label: "End game",
-          //   red30: true,
-          //   onPress: () => setShowEndGameDialog(true),
-          // },
-          // {
-          //   label: `Round: ${CONST.ROUND_TYPE.display[round]}`,
-          //   labelStyle: { fontWeight: "bold" },
-          //   onPress: toggleRoundHint,
-          // },
-          { label: `Words left: ${wordsLeftCount}` },
-        ]}
+    <>
+      <EndTurnDialog
+        isOpen={dialog === "END_TURN"}
+        setIsOpen={(shouldSet) => setDialog(shouldSet ? "END_TURN" : null)}
+        onEndTurn={goToNextPlayer}
       />
-    </View>
+
+      <View flex style={{ alignContent: "space-between" }}>
+        <View style={{ margin: 50 }}>
+          <Text text20 center marginB-30>
+            {playerTimeleft}
+          </Text>
+          <Text text60 center>
+            Your word is
+          </Text>
+          <Text text10 marginB-30 blue30 center marginH-20>
+            {currentWordDetails.word}
+          </Text>
+          <Button
+            text40
+            style={{ height: 80 }}
+            label="Partner guessed it!"
+            onPress={handleGuessedWord}
+          />
+        </View>
+        {showRoundHint && (
+          <View style={{ position: "absolute", bottom: 70 }}>
+            <Text center style={{ alignSelf: "flex-end" }}>
+              {roundDetails.HINT}
+            </Text>
+          </View>
+        )}
+        <View flex style={{ alignContent: "space-between" }}>
+          <ActionBar
+            actions={[
+              {
+                label: "End my turn",
+                red30: true,
+                onPress: () => setDialog("END_TURN"),
+              },
+              {
+                label: roundDetails.TITLE,
+                labelStyle: { fontWeight: "bold" },
+                onPress: () => setShowRoundHint((s) => !s),
+              },
+              { label: `Words left: ${wordsLeftCount}` },
+            ]}
+          />
+        </View>
+      </View>
+    </>
+  );
+}
+
+function EndTurnDialog({ isOpen, setIsOpen, onEndTurn }) {
+  return (
+    <Dialog visible={isOpen} onDismiss={() => setIsOpen(false)}>
+      <View>
+        <Text center text40 white>
+          Are you sure you want to end your turn?
+        </Text>
+        <Button
+          bg-red30
+          text40
+          marginV-20
+          label="End turn"
+          onPress={onEndTurn}
+        />
+        <Button
+          text40
+          label="Continue Playing"
+          onPress={() => setIsOpen(false)}
+        />
+      </View>
+    </Dialog>
   );
 }

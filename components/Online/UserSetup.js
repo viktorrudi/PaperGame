@@ -19,11 +19,13 @@ import * as API from "../../utils/api";
 function UserSetup({ navigation, userID }) {
   const [usernameField, setUsernameField] = useState("");
   const [imageURLField, setImageURLField] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     API.getCurrentUser().then(({ username, imageURL }) => {
       setUsernameField(username);
       setImageURLField(imageURL);
+      setIsLoading(false);
     });
   }, []);
 
@@ -52,11 +54,19 @@ function UserSetup({ navigation, userID }) {
         () => {}, // change
         () => {}, // error
         // complete
-        async () =>
-          uploadTask.snapshot.ref
-            .getDownloadURL()
-            .then(setImageURLField)
-            .catch((e) => setImageURLField(""))
+        async () => {
+          try {
+            const imageURL = await uploadTask.snapshot.ref.getDownloadURL();
+            setImageURLField(imageURL);
+            await API.updateCurrentUser({
+              username: usernameField,
+              imageURL,
+            });
+          } catch (e) {
+            setImageURLField("");
+            console.error(e);
+          }
+        }
       );
     } catch (e) {
       console.log(e);
@@ -71,6 +81,13 @@ function UserSetup({ navigation, userID }) {
     });
   }
 
+  if (isLoading) {
+    return (
+      <View flex center>
+        <Text center>Loading</Text>
+      </View>
+    );
+  }
   return (
     <ScrollView style={{ margin: 30 }}>
       <View center marginB-40>

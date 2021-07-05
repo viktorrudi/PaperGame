@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import _ from "lodash";
 import { QRCode } from "react-native-custom-qr-codes-expo";
 import { View, Button, Dialog, Text } from "react-native-ui-lib";
-import { Share, ScrollView } from "react-native";
+import { Share, ScrollView, ToastAndroid } from "react-native";
 
 import RowAction from "../Shared/RowAction";
 
@@ -39,7 +39,7 @@ export default function Lobby({ navigation, route }) {
     }
   }, [error]);
 
-  useEffect(redirectIfInGame, [lobby.meta?.status, lobby.meta?.id]);
+  // useEffect(redirectIfInGame, [lobby.meta?.status, lobby.meta?.id]);
 
   if (isLoading) return <Text>Loading</Text>;
   if (!lobby || !lobby.game || error) {
@@ -94,9 +94,9 @@ export default function Lobby({ navigation, route }) {
     return CONST_API.LOBBY_STATUS_GROUP.IN_GAME.includes(lobby.meta?.status);
   }
 
-  function redirectIfInGame() {
-    if (isLobbyInGame()) goToGame();
-  }
+  // function redirectIfInGame() {
+  //   if (isLobbyInGame()) goToGame();
+  // }
 
   function goToGame() {
     navigation.navigate(CONST.ROUTE.ONLINE_GAME, {
@@ -112,19 +112,36 @@ export default function Lobby({ navigation, route }) {
         onDismiss={() => setIsShareVisible(false)}
       />
       <View marginT-50 style={{ margin: 20 }}>
-        <RowAction
-          title={lobby.meta.displayName}
-          button={{
-            red: true,
-            label: "Leave Lobby",
-            action: handleLeaveLobby,
-          }}
-        />
+        {isLobbyInGame() ? (
+          <View>
+            <Text center text40 marginB-20>
+              A game is in progress
+            </Text>
+            <RowAction
+              title={lobby.meta.displayName}
+              subtitle={CONST_API.LOBBY_STATUS_DISPLAY[lobby.meta.status]}
+              button={{
+                label: "Re-join",
+                action: goToGame,
+              }}
+            />
+          </View>
+        ) : (
+          <RowAction
+            title={lobby.meta.displayName}
+            button={{
+              red: true,
+              label: "Leave Lobby",
+              action: handleLeaveLobby,
+            }}
+          />
+        )}
         <RowAction
           title="Teams"
           subtitle={`${countOf.players} player${
             countOf.players.length > 1 ? "s" : ""
           } joined`}
+          disabled={isLobbyInGame()}
           button={{
             label: "Join a Team",
             action: () => {
@@ -139,6 +156,7 @@ export default function Lobby({ navigation, route }) {
             subtitle={`${countOf.words} added. ${
               minWordsToStart - countOf.words
             } more needed`}
+            disabled={isLobbyInGame()}
             button={{
               label: `${usersWords.length > 0 ? "Edit" : "Add"} your words`,
               action: () => {
@@ -150,26 +168,60 @@ export default function Lobby({ navigation, route }) {
           />
         )}
 
+        <RowAction
+          title="Round Timer"
+          subtitle={`${lobby.rules.roundTimer} seconds`}
+          disabled={!isOwner || isLobbyInGame()}
+          disabled2={!isOwner || isLobbyInGame()}
+          button={{
+            label: "-",
+            action: () => {
+              if (lobby.rules.roundTimer <= 10) {
+                ToastAndroid.show("Minimum 10 seconds", ToastAndroid.SHORT);
+                return;
+              }
+              API.setRoundTimer(lobby, lobby.rules.roundTimer - 10);
+            },
+          }}
+          button2={{
+            label: "+",
+            action: () => {
+              if (lobby.rules.roundTimer >= 500) {
+                ToastAndroid.show(
+                  "You've reached the maximum time limit",
+                  ToastAndroid.SHORT
+                );
+                return;
+              }
+              API.setRoundTimer(lobby, lobby.rules.roundTimer + 10);
+            },
+          }}
+        />
+
         <Button
           marginT-50
           outline
           text60
+          disabled={isLobbyInGame()}
           label="Invite Players"
           onPress={() => setIsShareVisible(true)}
         />
         {isOwner && (
           <>
-            <Button
-              text40
-              marginT-20
-              disabled={
-                countOf.words < minWordsToStart ||
-                countOf.players < CONST.GAME_RULES.PLAYER.MIN ||
-                countOf.teams < CONST.GAME_RULES.TEAM.MIN // unlikely to be false
-              }
-              label="Start game"
-              onPress={handleStartGame}
-            />
+            {!isLobbyInGame() && (
+              <Button
+                text40
+                marginT-20
+                disabled={
+                  countOf.words < minWordsToStart ||
+                  countOf.players < CONST.GAME_RULES.PLAYER.MIN ||
+                  countOf.teams < CONST.GAME_RULES.TEAM.MIN // unlikely to be false
+                }
+                label="Start game"
+                onPress={handleStartGame}
+              />
+            )}
+
             <Button
               text40
               bg-red30

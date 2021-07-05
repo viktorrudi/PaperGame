@@ -7,7 +7,7 @@ import * as CONST from "../../../constants";
 import * as API_CONST from "../../../constants/api";
 import * as API from "../../../utils/api";
 
-export default function NextPlayerAnnouncement({ lobby }) {
+export default function NextPlayerAnnouncement({ lobby, roundDetails }) {
   const currentUID = API.getCurrentUserUID();
   const [nextPlayer, setNextPlayer] = useState(null);
 
@@ -47,8 +47,8 @@ export default function NextPlayerAnnouncement({ lobby }) {
               nextPlayerUID
             )} to get ready`
       }
-      subheading=""
-      text={CONST.ROUND_TYPE_HINT[lobby.meta.status]}
+      subheading={roundDetails.TITLE}
+      text={roundDetails.HINT}
       action={
         nextIsCurrentPlayer ? { label: "I'm ready!", onClick: goToRound } : null
       }

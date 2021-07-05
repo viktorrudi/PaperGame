@@ -3,15 +3,24 @@ import firebase from "firebase";
 import { connect } from "react-redux";
 import { useFocusEffect } from "@react-navigation/native";
 
-import { TouchableHighlight, Linking } from "react-native";
+import { TouchableHighlight, Linking, ToastAndroid } from "react-native";
 import { View, Text, Button, Image } from "react-native-ui-lib";
 
 import { FirebaseSeeder } from "../utils/db";
 import * as CONST from "../constants";
+import * as CONST_API from "../constants/api";
 import * as API from "../utils/api";
 import githubLogo from "../assets/github-logo.png";
 
 function MainMenu({ navigation, isUserAuth, userEmail }) {
+  function byRouteRestrictions({ route }) {
+    const routeRules = {
+      [CONST.ROUTE.SETUP_USER]: isUserAuth,
+      [CONST.ROUTE.GAME_SETTINGS]: !isUserAuth,
+      [CONST.ROUTE.OFFLINE_SETUP_TEAM]: !isUserAuth,
+    };
+    return routeRules[route];
+  }
   return (
     <View flex center>
       <Text text5 center blue30>
@@ -23,17 +32,18 @@ function MainMenu({ navigation, isUserAuth, userEmail }) {
       <Text text80 marginB-30 grey40>
         v{CONST.VERSION_NUMBER}
       </Text>
-      {CONST.MAIN_MENU_ROUTES.map(({ label, route }) => (
-        <Button
-          key={route}
-          text40
-          disabled={!isUserAuth && route === CONST.ROUTE.SETUP_USER}
-          marginB-10
-          label={label}
-          style={{ width: "70%" }}
-          onPress={() => navigation.navigate(route)}
-        />
-      ))}
+      {CONST.MAIN_MENU_ROUTES.filter(byRouteRestrictions).map(
+        ({ label, route }) => (
+          <Button
+            key={route}
+            text40
+            marginB-10
+            label={label}
+            style={{ width: "70%" }}
+            onPress={() => navigation.navigate(route)}
+          />
+        )
+      )}
       <Button
         text70
         size="small"
@@ -46,9 +56,21 @@ function MainMenu({ navigation, isUserAuth, userEmail }) {
       <Button
         text70
         size="small"
-        label="SEED"
+        label="SEED (start)"
         onPress={() => {
-          FirebaseSeeder().lobby().seed();
+          FirebaseSeeder().lobby("start").seed();
+          ToastAndroid.show("Seeded", ToastAndroid.SHORT);
+        }}
+      />
+      <Button
+        text70
+        size="small"
+        label="SEED (game over)"
+        onPress={() => {
+          FirebaseSeeder()
+            .lobby("end", CONST_API.LOBBY_STATUS.GAME_OVER)
+            .seed();
+          ToastAndroid.show("Seeded", ToastAndroid.SHORT);
         }}
       />
 

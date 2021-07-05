@@ -27,10 +27,9 @@ export default function Game({ navigation, route }) {
   const isInRound = lobby.meta.status === LOBBY_STATUS.IN_ROUND;
 
   const metaComponents = {
-    // Round explanation
     [LOBBY_STATUS.ROUND_EXPLANATION]: () => (
       <Announcement
-        heading="Let's get started!"
+        heading="The rules of this round"
         subheading={roundDetails.TITLE}
         text={roundDetails.HINT}
         action={{
@@ -44,11 +43,12 @@ export default function Game({ navigation, route }) {
         }}
       />
     ),
-    // Next Player
     [LOBBY_STATUS.PLAYER_ANNOUNCEMENT]: () => (
-      <NextPlayerAnnouncement lobby={lobby} />
+      <NextPlayerAnnouncement roundDetails={roundDetails} lobby={lobby} />
     ),
-    [LOBBY_STATUS.GAME_OVER]: () => <GameEnd lobby={lobby} />,
+    [LOBBY_STATUS.GAME_OVER]: () => (
+      <GameEnd navigation={navigation} lobby={lobby} />
+    ),
   };
 
   const MetaComponent = metaComponents[lobby.meta.status];
@@ -62,9 +62,9 @@ export default function Game({ navigation, route }) {
     );
   }
 
-  return (
-    <View>
-      {isInRound ? <WordExpression lobby={lobby} /> : <MetaComponent />}
-    </View>
+  return isInRound ? (
+    <WordExpression lobby={lobby} roundDetails={roundDetails} />
+  ) : (
+    <MetaComponent />
   );
 }

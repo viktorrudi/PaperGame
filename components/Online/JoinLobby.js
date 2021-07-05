@@ -85,40 +85,49 @@ export default function JoinLobby({ navigation, route }) {
 
       {/* TODO: Remove before publishing to store */}
       <View marginT-40>
-        <Text>Available Lobbies</Text>
-        <FlatList
-          data={lobbies}
-          keyExtractor={(lobby) => lobby.meta.id}
-          renderItem={({ item: lobby }) => {
-            return (
-              <View
-                marginT-20
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                }}
-              >
-                <View>
-                  <Text text50>{lobby.meta.displayName}</Text>
-                  <Text text80>
-                    {CONST_API.LOBBY_STATUS_DISPLAY[lobby.meta.status] || ""}
-                  </Text>
-                </View>
-                <Button
-                  text60
-                  outline={lobbyID.length > 0}
-                  label="Join"
-                  onPress={() =>
-                    navigation.navigate(CONST.ROUTE.LOBBY, {
-                      lobbyID: lobby.meta.id,
-                    })
-                  }
-                />
-              </View>
-            );
-          }}
-        />
+        {lobbies.length === 0 ? (
+          <View>
+            <Text>No available lobbies</Text>
+          </View>
+        ) : (
+          <>
+            <Text>Available Lobbies</Text>
+            <FlatList
+              data={lobbies}
+              keyExtractor={(lobby) => lobby.meta.id}
+              renderItem={({ item: lobby }) => {
+                return (
+                  <View
+                    marginT-20
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <View>
+                      <Text text50>{lobby.meta.displayName}</Text>
+                      <Text text80>
+                        {CONST_API.LOBBY_STATUS_DISPLAY[lobby.meta.status] ||
+                          ""}
+                      </Text>
+                    </View>
+                    <Button
+                      text60
+                      outline={lobbyID.length > 0}
+                      label="Join"
+                      onPress={() =>
+                        navigation.navigate(CONST.ROUTE.LOBBY, {
+                          lobbyID: lobby.meta.id,
+                        })
+                      }
+                    />
+                  </View>
+                );
+              }}
+            />
+          </>
+        )}
       </View>
     </View>
   );

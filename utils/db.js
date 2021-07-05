@@ -4,11 +4,12 @@ import * as DB_CONST from "../constants/db";
 
 export function FirebaseSeeder() {
   return {
-    lobby: () => {
+    lobby: (name = "", status) => {
       const lobbyProps = API.getDefaultLobbyProps(
         null,
         "55bvUTYNTjhxqFD6yUvgLgARGp33",
-        "Seed lobby"
+        `${name} (SEED)`,
+        status
       );
       lobbyProps.game.availableWords = DB_CONST.AVAILABLE_WORDS;
       lobbyProps.teams = Object.entries(lobbyProps.teams).reduce(
@@ -23,7 +24,6 @@ export function FirebaseSeeder() {
         },
         {}
       );
-      console.log(lobbyProps);
       return {
         seed: () => {
           const lobbiesRef = firebase.database().ref("/lobbies");

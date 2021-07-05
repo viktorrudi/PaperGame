@@ -8,6 +8,8 @@ import { ScrollView } from "react-native";
 import { View, Button, Dialog, Text, ActionBar } from "react-native-ui-lib";
 
 function GameEnd({ navigation, lobby }) {
+  const isOwner = lobby.meta.creator === API.getCurrentUserUID();
+
   function getTeamsByScore() {
     return Object.values(lobby.teams).sort((a, b) => a.score - b.score);
   }
@@ -26,8 +28,12 @@ function GameEnd({ navigation, lobby }) {
   }
 
   function backToMainMenu() {
-    console.log(navigation);
     navigation.navigate(CONST.ROUTE.MAIN_MENU);
+  }
+
+  async function closeLobby() {
+    await API.deleteLobby(lobby.meta.id);
+    backToMainMenu();
   }
 
   return (
@@ -88,13 +94,21 @@ function GameEnd({ navigation, lobby }) {
             );
           })}
         </View>
-
-        <Button
-          style={{ width: "90%" }}
-          label="Go to the main menu"
-          onPress={backToMainMenu}
-          marginV-20
-        />
+        {isOwner ? (
+          <Button
+            style={{ width: "90%" }}
+            label="Close lobby"
+            onPress={closeLobby}
+            marginV-20
+          />
+        ) : (
+          <Button
+            style={{ width: "90%" }}
+            label="Go to the main menu"
+            onPress={backToMainMenu}
+            marginV-20
+          />
+        )}
       </View>
     </ScrollView>
   );

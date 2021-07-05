@@ -126,14 +126,15 @@ export function getDefaultDbProps(userID) {
 export function getDefaultLobbyProps(
   lobbyKey,
   uid = getCurrentUserUID(),
-  lobbyName = ""
+  displayName = "",
+  status = CONST_API.LOBBY_STATUS.READY
 ) {
   return {
     meta: {
       id: lobbyKey,
       creator: uid,
-      displayName: lobbyName,
-      status: CONST_API.LOBBY_STATUS.READY,
+      displayName,
+      status,
       createdAt: new Date().getTime(),
     },
     game: {
@@ -148,7 +149,7 @@ export function getDefaultLobbyProps(
       // wordID: { id, word, author }
       availableWords: 0,
       // 0|1|2
-      activeRound: 0,
+      activeRound: status === CONST_API.LOBBY_STATUS.GAME_OVER ? 3 : 0,
     },
     rules: {
       roundTimer: "30",
@@ -265,6 +266,12 @@ export async function saveWords(lobbyID, words) {
   await getLobbyRefByID(lobbyID)
     .child(`game/availableWords`)
     .update(updatedWords);
+}
+
+export async function setRoundTimer(lobby, seconds) {
+  await getLobbyRefByID(lobby.meta.id).child("rules").update({
+    roundTimer: seconds,
+  });
 }
 
 export async function leaveTeam(lobbyID, teamID) {

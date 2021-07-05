@@ -115,9 +115,6 @@ const screens = {
       ...headerStyle,
     },
   },
-  [CONST.ROUTE.ONLINE_GAME_END]: {
-    Component: OnlineGameEnd,
-  },
   [CONST.ROUTE.ONLINE_SETUP_WORDS]: {
     Component: OnlineWordSetup,
     options: {

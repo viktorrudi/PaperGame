@@ -28,8 +28,9 @@ export default function Announcement({
       {action ? (
         <View flex>
           <Button
-            text60
+            text40
             marginB-10
+            style={{ height: 70 }}
             label={action.label}
             onPress={action.onClick}
           />
