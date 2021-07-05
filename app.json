@@ -17,7 +17,7 @@
     "assetBundlePatterns": ["**/*"],
     "android": {
       "package": "com.vrudi.papergame",
-      "versionCode": 2,
+      "versionCode": 3,
       "permissions":[]
     },
     "ios": {
