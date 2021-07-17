@@ -1,16 +1,16 @@
-import React, { useState } from 'react'
-import { connect } from 'react-redux'
+import React, { useState } from "react";
+import { connect } from "react-redux";
 
-import { ScrollView } from 'react-native'
-import { View, Button, TextField } from 'react-native-ui-lib'
+import { ScrollView } from "react-native";
+import { View, Button, TextField } from "react-native-ui-lib";
 
-import * as CONST from '../constants'
+import * as CONST from "../constants";
 
 function GameSettings({ navigation, dispatch, gameSettings }) {
-  const [minWords, setMinWords] = useState(gameSettings.minWords.toString())
+  const [minWords, setMinWords] = useState(gameSettings.minWords.toString());
   const [roundTimer, setRoundTimer] = useState(
     gameSettings.roundTimer.toString()
-  )
+  );
   // const [powerPointsPerRound, setPowerPointsPerRound] = useState(
   //   gameSettings.powerPointsPerRound.toString()
   // )
@@ -23,13 +23,13 @@ function GameSettings({ navigation, dispatch, gameSettings }) {
         // powerPointsPerRound: parseInt(powerPointsPerRound.trim()),
         minWords: parseInt(minWords.trim()),
       },
-    })
-    navigation.navigate(CONST.ROUTE.MAIN_MENU)
+    });
+    navigation.navigate(CONST.ROUTE.MAIN_MENU);
   }
 
   function checkForErrors() {
-    const states = [minWords, roundTimer]
-    return states.some((state) => state.length === 0 || isNaN(state))
+    const states = [minWords, roundTimer];
+    return states.some((state) => state.length === 0 || isNaN(state));
   }
 
   return (
@@ -66,13 +66,13 @@ function GameSettings({ navigation, dispatch, gameSettings }) {
         />
       </View>
     </ScrollView>
-  )
+  );
 }
 
 const mapStateToProps = (state) => ({
   gameSettings: state.gameSettings || {},
-})
+});
 
 export default connect(mapStateToProps, (dispatch) => ({ dispatch }))(
   GameSettings
-)
+);
